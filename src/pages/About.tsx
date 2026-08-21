@@ -4,7 +4,7 @@ export function About() {
       {/* Hero */}
       <section className="relative min-h-[70vh] flex items-center justify-center px-6 pt-24 pb-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img
+          <img referrerPolicy="no-referrer"
             src="https://images.unsplash.com/photo-1498843053639-170ff2122f35?q=80&w=2070&auto=format&fit=crop"
             alt="Minimalist lifestyle scene"
             className="w-full h-full object-cover"

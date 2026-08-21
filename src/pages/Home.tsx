@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import { products, categories } from '../data';
 import { ProductCard } from '../components/ProductCard';
 
@@ -12,41 +13,45 @@ export function Home() {
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center px-6 pt-24 pb-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img
+          <img referrerPolicy="no-referrer"
             src="https://images.unsplash.com/photo-1615397323282-315dc6b5a305?q=80&w=2070&auto=format&fit=crop"
             alt="Minimalist lifestyle scene"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]"></div>
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-[2px]"></div>
         </div>
         
-        <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-24">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-24"
+        >
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight text-primary leading-[1.1] mb-6">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter text-primary leading-[1.05] mb-6">
               EVERYDAY,<br />ELEVATED.
             </h1>
-            <p className="text-lg md:text-xl text-primary/80 max-w-md mx-auto md:mx-0 mb-10 font-light">
+            <p className="text-lg md:text-xl text-primary/80 max-w-md mx-auto md:mx-0 mb-10 font-light leading-relaxed">
               Thoughtfully selected essentials for the way you live.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
               <Link
                 to="/shop"
-                className="w-full sm:w-auto px-8 py-4 bg-primary text-white text-xs font-medium tracking-widest rounded hover:opacity-90 transition-opacity text-center"
+                className="w-full sm:w-auto px-10 py-4 bg-primary text-white text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity text-center shadow-lg shadow-primary/20"
               >
                 SHOP NOW
               </Link>
               <Link
                 to="/about"
-                className="w-full sm:w-auto px-8 py-4 bg-transparent text-primary border border-primary/20 text-xs font-medium tracking-widest rounded hover:bg-black/5 transition-colors text-center"
+                className="w-full sm:w-auto px-10 py-4 bg-white/50 backdrop-blur-md text-primary border border-primary/10 text-xs font-semibold tracking-widest rounded hover:bg-white/80 transition-colors text-center"
               >
                 EXPLORE
               </Link>
             </div>
           </div>
           <div className="flex-1 hidden md:block">
-            {/* Empty space to balance the hero or an optional featured product tile */}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Quick Category Navigation */}
@@ -59,7 +64,7 @@ export function Home() {
               className="group block"
             >
               <div className="aspect-square bg-accent/30 rounded-lg overflow-hidden mb-6 relative">
-                <img
+                <img referrerPolicy="no-referrer"
                   src={category.image}
                   alt={category.name}
                   className="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-105"

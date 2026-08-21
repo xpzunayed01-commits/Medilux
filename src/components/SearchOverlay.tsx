@@ -87,7 +87,7 @@ export function SearchOverlay({
                       className="flex items-center gap-4 text-left group"
                     >
                       <div className="w-16 h-16 bg-accent/30 rounded overflow-hidden flex-shrink-0">
-                        <img
+                        <img referrerPolicy="no-referrer"
                           src={product.image}
                           alt={product.name}
                           className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500"

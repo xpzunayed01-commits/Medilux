@@ -45,7 +45,7 @@ export function CartPage() {
                 {/* Product Info */}
                 <div className="w-full md:col-span-6 flex gap-6 items-center">
                   <Link to={`/product/${item.product.id}`} className="w-24 h-32 flex-shrink-0 bg-accent/30 rounded overflow-hidden">
-                    <img
+                    <img referrerPolicy="no-referrer"
                       src={item.product.image}
                       alt={item.product.name}
                       className="w-full h-full object-cover mix-blend-multiply"

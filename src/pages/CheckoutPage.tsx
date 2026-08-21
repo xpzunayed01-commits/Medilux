@@ -120,7 +120,7 @@ export function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex gap-4">
                     <div className="w-16 h-20 bg-accent/30 rounded overflow-hidden flex-shrink-0 relative">
-                      <img src={item.product.image} alt="" className="w-full h-full object-cover mix-blend-multiply" />
+                      <img referrerPolicy="no-referrer" src={item.product.image} alt="" className="w-full h-full object-cover mix-blend-multiply" />
                       <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full z-10">{item.quantity}</span>
                     </div>
                     <div className="flex-1 flex flex-col justify-center">

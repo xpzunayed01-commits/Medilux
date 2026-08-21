@@ -32,7 +32,7 @@ export function CollectionPage() {
       {/* Category Hero */}
       <section className="relative h-[40vh] md:h-[50vh] flex items-center justify-center px-6 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img
+          <img referrerPolicy="no-referrer"
             src={category!.image}
             alt={category!.name}
             className="w-full h-full object-cover"

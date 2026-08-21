@@ -36,7 +36,13 @@ export function ProductPage() {
   };
 
   return (
-    <div className="flex-1 pt-24 pb-24">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="flex-1 pt-24 pb-24"
+    >
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
           
@@ -46,7 +52,7 @@ export function ProductPage() {
               className="aspect-[4/5] bg-[#F2F0EB] rounded-lg overflow-hidden cursor-zoom-in relative group"
               onClick={() => setIsFullscreen(true)}
             >
-              <img
+              <img referrerPolicy="no-referrer"
                 src={product.images[activeImage]}
                 alt={product.name}
                 className="w-full h-full object-cover mix-blend-multiply"
@@ -64,7 +70,7 @@ export function ProductPage() {
                     onClick={() => setActiveImage(index)}
                     className={`w-20 h-24 flex-shrink-0 rounded bg-[#F2F0EB] overflow-hidden ${activeImage === index ? 'ring-1 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'} transition-all`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover mix-blend-multiply" />
+                    <img referrerPolicy="no-referrer" src={img} alt="" className="w-full h-full object-cover mix-blend-multiply" />
                   </button>
                 ))}
               </div>
@@ -205,7 +211,7 @@ export function ProductPage() {
             className="fixed inset-0 z-50 bg-white/95 backdrop-blur-md flex items-center justify-center p-6 cursor-zoom-out"
             onClick={() => setIsFullscreen(false)}
           >
-            <img
+            <img referrerPolicy="no-referrer"
               src={product.images[activeImage]}
               alt={product.name}
               className="max-w-full max-h-full object-contain mix-blend-multiply"
@@ -213,6 +219,6 @@ export function ProductPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
