@@ -1,0 +1,6 @@
+{
+  "name": "Medilux E-commerce",
+  "description": "A premium modern D2C lifestyle brand website for Medilux, featuring product browsing and checkout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
