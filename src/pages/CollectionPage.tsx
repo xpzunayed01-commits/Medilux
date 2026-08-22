@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { products, categories } from '../data';
 import { ProductCard } from '../components/ProductCard';
+import { AnimatedSection } from '../components/AnimatedSection';
 
 export function CollectionPage() {
   const { id } = useParams();
@@ -9,7 +10,7 @@ export function CollectionPage() {
   const category = id ? categories.find((c) => c.id === id) : {
     name: 'ALL PRODUCTS',
     description: 'Thoughtfully selected essentials for the way you live.',
-    image: 'https://images.unsplash.com/photo-1615397323282-315dc6b5a305?q=80&w=2070&auto=format&fit=crop'
+    image: 'https://picsum.photos/id/292/2000/1200'
   };
 
   const filteredProducts = id
@@ -51,7 +52,7 @@ export function CollectionPage() {
       </section>
 
       {/* Product Grid */}
-      <section className="py-24 px-6">
+      <AnimatedSection className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-24">
@@ -65,7 +66,7 @@ export function CollectionPage() {
             </div>
           )}
         </div>
-      </section>
+      </AnimatedSection>
     </div>
   );
 }

@@ -33,9 +33,9 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-40 transition-all duration-300',
+          'fixed top-0 left-0 right-0 z-40 transition-all duration-500',
           isScrolled
-            ? 'bg-white/80 backdrop-blur-md border-b border-black/5 py-4'
+            ? 'glass shadow-sm py-4'
             : 'bg-transparent py-6'
         )}
       >
@@ -67,7 +67,7 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
             to="/"
             className="text-xl md:text-2xl font-semibold tracking-widest text-primary flex-shrink-0"
           >
-            MEDILUX
+            <img src="https://i.postimg.cc/Y0Qrtp6H/Picsart-26-08-22-16-03-45-163.png" alt="MEDILUX" className="h-8 md:h-10" />
           </Link>
 
           {/* Icons (Right) */}
@@ -107,7 +107,7 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
           >
             <div className="flex items-center justify-between p-6">
               <span className="text-xl font-semibold tracking-widest text-primary">
-                MEDILUX
+                <img src="https://i.postimg.cc/Y0Qrtp6H/Picsart-26-08-22-16-03-45-163.png" alt="MEDILUX" className="h-8" />
               </span>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}

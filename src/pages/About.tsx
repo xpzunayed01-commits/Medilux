@@ -1,3 +1,5 @@
+import { AnimatedSection } from '../components/AnimatedSection';
+
 export function About() {
   return (
     <div className="flex-1">
@@ -5,7 +7,7 @@ export function About() {
       <section className="relative min-h-[70vh] flex items-center justify-center px-6 pt-24 pb-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img referrerPolicy="no-referrer"
-            src="https://images.unsplash.com/photo-1498843053639-170ff2122f35?q=80&w=2070&auto=format&fit=crop"
+            src="https://picsum.photos/id/292/2000/1200"
             alt="Minimalist lifestyle scene"
             className="w-full h-full object-cover"
           />
@@ -23,7 +25,7 @@ export function About() {
       </section>
 
       {/* Story Text */}
-      <section className="py-32 px-6">
+      <AnimatedSection className="py-32 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="space-y-12 text-lg md:text-xl font-light leading-relaxed text-text-main">
             <p>
@@ -37,10 +39,10 @@ export function About() {
             </p>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* Philosophy Grid */}
-      <section className="py-24 px-6 bg-[#F2F0EB]">
+      <AnimatedSection className="py-24 px-6 bg-[#F2F0EB]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 text-center">
           <div>
             <h3 className="text-sm font-medium tracking-widest text-primary mb-4">THOUGHTFUL SOURCING</h3>
@@ -61,7 +63,7 @@ export function About() {
             </p>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
     </div>
   );
 }

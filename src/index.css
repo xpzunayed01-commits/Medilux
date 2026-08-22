@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1A3626;
-  --color-secondary: #8A9A86;
-  --color-background: #FAF9F6;
+  --color-primary: #1A3626;      /* Deep Forest Green */
+  --color-secondary: #8A9A86;    /* Muted Sage */
+  --color-background: #FAF9F6;   /* Warm Ivory */
   --color-surface: #FFFFFF;
-  --color-text-main: #1C1C1C;
+  --color-text-main: #1C1C1C;    /* Deep Charcoal */
   --color-text-muted: #666666;
-  --color-accent: #E8E3D9;
+  --color-accent: #E8E3D9;       /* Muted Beige */
   
   --font-sans: 'Plus Jakarta Sans', sans-serif;
 }
@@ -24,6 +24,17 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  
+  /* Surrealism utilities */
+  .floating {
+    animation: floating 3s ease-in-out infinite;
+  }
+  
+  @keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -32,4 +43,11 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.glass {
+  background: rgba(250, 249, 246, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(26, 54, 38, 0.05);
 }

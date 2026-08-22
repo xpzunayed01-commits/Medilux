@@ -37,188 +37,77 @@ export function ProductPage() {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="flex-1 pt-24 pb-24"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1, ease: "easeOut" }}
+      className="flex-1 pt-32 pb-24 bg-background"
     >
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
+        <div className="flex flex-col lg:flex-row gap-16 lg:gap-32">
           
-          {/* Image Gallery */}
-          <div className="lg:w-1/2 flex flex-col gap-4">
+          {/* Surreal Image Gallery */}
+          <div className="lg:w-1/2">
             <div 
-              className="aspect-[4/5] bg-[#F2F0EB] rounded-lg overflow-hidden cursor-zoom-in relative group"
+              className="aspect-[3/4] bg-accent/20 rounded-[2rem] overflow-hidden cursor-zoom-in relative group shadow-2xl"
               onClick={() => setIsFullscreen(true)}
             >
               <img referrerPolicy="no-referrer"
                 src={product.images[activeImage]}
                 alt={product.name}
-                className="w-full h-full object-cover mix-blend-multiply"
+                className="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="text-white text-xs tracking-widest font-medium bg-black/40 px-4 py-2 rounded backdrop-blur-sm">CLICK TO EXPAND</span>
-              </div>
             </div>
-            
-            {product.images.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto no-scrollbar py-2">
-                {product.images.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveImage(index)}
-                    className={`w-20 h-24 flex-shrink-0 rounded bg-[#F2F0EB] overflow-hidden ${activeImage === index ? 'ring-1 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'} transition-all`}
-                  >
-                    <img referrerPolicy="no-referrer" src={img} alt="" className="w-full h-full object-cover mix-blend-multiply" />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Product Info */}
+          {/* Product Info Panel */}
           <div className="lg:w-1/2 flex flex-col justify-center">
-            <div className="mb-8">
-              <Link to={`/collections/${product.category}`} className="text-xs tracking-widest text-text-muted hover:text-primary transition-colors uppercase mb-4 block">
-                {product.category}
-              </Link>
-              <h1 className="text-3xl md:text-4xl font-light tracking-tight text-primary mb-2">
-                {product.name}
-              </h1>
-              <p className="text-lg text-text-muted">{product.descriptor}</p>
+            <Link to={`/collections/${product.category}`} className="text-xs tracking-[0.2em] text-text-muted hover:text-primary transition-colors uppercase mb-6 block font-semibold">
+              {product.category}
+            </Link>
+            <h1 className="text-5xl md:text-6xl font-light tracking-tighter text-primary mb-6">
+              {product.name}
+            </h1>
+            <p className="text-lg text-text-muted mb-10 font-light italic">{product.descriptor}</p>
+
+            <div className="mb-12">
+              <span className="text-3xl font-light">{formatPrice(product.price)}</span>
             </div>
 
-            <div className="mb-10">
-              <span className="text-2xl font-medium">{formatPrice(product.price)}</span>
-            </div>
-
-            <div className="flex items-center gap-4 mb-8">
-              <div className="flex items-center border border-black/10 rounded h-14">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-4 text-text-muted hover:text-primary h-full"
-                >
+            <div className="flex items-center gap-6 mb-12">
+              <div className="flex items-center border border-primary/20 rounded-full h-14 px-2">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 text-primary hover:opacity-50">
                   <Minus size={16} />
                 </button>
-                <span className="w-12 text-center font-medium">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-4 text-text-muted hover:text-primary h-full"
-                >
+                <span className="w-12 text-center font-light text-lg">{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)} className="px-4 text-primary hover:opacity-50">
                   <Plus size={16} />
                 </button>
               </div>
               <button
                 onClick={handleAddToCart}
-                className="flex-1 bg-primary text-white h-14 text-xs font-medium tracking-widest rounded hover:opacity-90 transition-opacity"
+                className="flex-1 bg-primary text-white h-14 text-xs font-semibold tracking-[0.2em] rounded-full hover:opacity-90 transition-all shadow-xl"
               >
                 ADD TO CART
               </button>
             </div>
 
-            {/* Accordions */}
-            <div className="border-t border-black/10 pt-4 mt-8">
-              <div className="border-b border-black/10">
-                <button
-                  onClick={() => toggleAccordion('description')}
-                  className="w-full flex items-center justify-between py-6 text-sm font-medium tracking-widest"
-                >
-                  DESCRIPTION
-                  <ChevronDown size={16} className={`transform transition-transform duration-300 ${activeAccordion === 'description' ? 'rotate-180' : ''}`} />
-                </button>
-                <AnimatePresence>
-                  {activeAccordion === 'description' && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="pb-6 text-text-muted leading-relaxed font-light">
-                        {product.description}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {product.ingredients && (
-                <div className="border-b border-black/10">
-                  <button
-                    onClick={() => toggleAccordion('ingredients')}
-                    className="w-full flex items-center justify-between py-6 text-sm font-medium tracking-widest"
-                  >
-                    INGREDIENTS & SPECS
-                    <ChevronDown size={16} className={`transform transition-transform duration-300 ${activeAccordion === 'ingredients' ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {activeAccordion === 'ingredients' && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="pb-6 text-text-muted leading-relaxed font-light">
-                          {product.ingredients}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-
-              {product.howToUse && (
-                <div className="border-b border-black/10">
-                  <button
-                    onClick={() => toggleAccordion('usage')}
-                    className="w-full flex items-center justify-between py-6 text-sm font-medium tracking-widest"
-                  >
-                    HOW TO USE
-                    <ChevronDown size={16} className={`transform transition-transform duration-300 ${activeAccordion === 'usage' ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {activeAccordion === 'usage' && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="pb-6 text-text-muted leading-relaxed font-light">
-                          {product.howToUse}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
+            {/* Simplified Accordions */}
+            <div className="border-t border-primary/10 pt-6">
+              <button onClick={() => toggleAccordion('description')} className="w-full flex items-center justify-between py-6 text-xs font-semibold tracking-[0.2em] text-primary">
+                DESCRIPTION
+                <ChevronDown size={16} className={`transform transition-transform duration-300 ${activeAccordion === 'description' ? 'rotate-180' : ''}`} />
+              </button>
+              <AnimatePresence>
+                {activeAccordion === 'description' && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <p className="pb-6 text-text-muted leading-relaxed font-light">{product.description}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Fullscreen Image Viewer */}
-      <AnimatePresence>
-        {isFullscreen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-white/95 backdrop-blur-md flex items-center justify-center p-6 cursor-zoom-out"
-            onClick={() => setIsFullscreen(false)}
-          >
-            <img referrerPolicy="no-referrer"
-              src={product.images[activeImage]}
-              alt={product.name}
-              className="max-w-full max-h-full object-contain mix-blend-multiply"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }
