@@ -37,6 +37,8 @@ export function CollectionPage() {
             src={category!.image}
             alt={category!.name}
             className="w-full h-full object-cover"
+            fetchPriority="high"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]"></div>
         </div>

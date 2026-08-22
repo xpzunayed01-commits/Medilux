@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { products, categories } from '../data';
@@ -8,15 +9,57 @@ export function Home() {
   const featuredProducts = products.slice(0, 4);
   const bestSellers = products.filter((p) => p.isBestseller);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollDirection = useRef(1);
+  const pauseTimeout = useRef<any>(null);
+  const isPaused = useRef(false);
+
+  const handleInteract = () => {
+    isPaused.current = true;
+    if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+    pauseTimeout.current = setTimeout(() => {
+      isPaused.current = false;
+    }, 1500);
+  };
+
+  useEffect(() => {
+    let animationId: number;
+    const scroll = () => {
+      if (scrollRef.current && !isPaused.current) {
+        const { scrollWidth, clientWidth, scrollLeft, children } = scrollRef.current;
+        // Only auto-scroll if content is wider than container (i.e. on mobile)
+        if (scrollWidth > clientWidth && children.length >= categories.length * 2) {
+          const firstSetWidth = (children[categories.length] as HTMLElement).offsetLeft - (children[0] as HTMLElement).offsetLeft;
+          
+          if (scrollLeft >= firstSetWidth) {
+            scrollRef.current.scrollLeft -= firstSetWidth;
+          } else if (scrollLeft <= 0) {
+            scrollRef.current.scrollLeft += firstSetWidth;
+          }
+          
+          scrollRef.current.scrollLeft += 3;
+        }
+      }
+      animationId = requestAnimationFrame(scroll);
+    };
+    animationId = requestAnimationFrame(scroll);
+    return () => {
+      cancelAnimationFrame(animationId);
+      if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col bg-background text-text-main">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img referrerPolicy="no-referrer"
-            src="https://picsum.photos/id/292/2000/1200"
+            src="https://i.postimg.cc/nzJnVXkz/Picsart-26-08-22-17-53-33-572.jpg"
             alt="Minimalist lifestyle scene"
             className="w-full h-full object-cover scale-110"
+            fetchPriority="high"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-background/30 backdrop-blur-[1px]"></div>
         </div>
@@ -38,14 +81,21 @@ export function Home() {
       </section>
 
       {/* Surreal Category Scene */}
-      <AnimatedSection className="py-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-row overflow-x-auto gap-6 pb-6 md:grid md:grid-cols-2 md:gap-12 md:overflow-visible">
-            {categories.map((category, i) => (
+      <AnimatedSection className="py-16">
+        <div className="w-full md:max-w-7xl md:mx-auto md:px-6">
+          <div 
+            ref={scrollRef}
+            onTouchStart={handleInteract}
+            onTouchMove={handleInteract}
+            onMouseDown={handleInteract}
+            onWheel={handleInteract}
+            className="flex flex-row overflow-x-auto gap-6 pb-6 md:grid md:grid-cols-2 md:gap-12 md:overflow-visible no-scrollbar px-0"
+          >
+            {[...categories, ...categories, ...categories].map((category, i) => (
               <Link
-                key={category.id}
+                key={`${category.id}-${i}`}
                 to={`/collections/${category.id}`}
-                className={`group block relative min-w-[220px] md:min-w-0 ${i % 2 === 0 ? 'mt-0' : 'md:mt-32'}`}
+                className={`group block relative min-w-[220px] md:min-w-0 ${i % 2 === 0 ? 'mt-0' : 'md:mt-32'} ${i >= categories.length ? 'md:hidden' : ''}`}
               >
                 <div className="aspect-[3/4] rounded-2xl overflow-hidden relative shadow-lg">
                   <img referrerPolicy="no-referrer"
