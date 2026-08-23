@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { products as fallbackProducts } from '../data';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../lib/utils';
-import { Plus, Minus, ChevronDown, CheckCircle, AlertTriangle, XCircle, Truck, ShieldCheck } from 'lucide-react';
+import { Plus, Minus, ChevronDown, CheckCircle, AlertTriangle, XCircle, Truck, ShieldCheck, Zap, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToProducts, subscribeToSiteSettings, defaultSiteSettings } from '../lib/dataService';
 import { Product, SiteSettings } from '../types';
 
 export function ProductPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [productsList, setProductsList] = useState<Product[]>(fallbackProducts);
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
 
@@ -50,7 +51,12 @@ export function ProductPage() {
   const handleAddToCart = () => {
     if (isOutOfStock) return;
     addToCart(product, quantity);
-    setQuantity(1);
+  };
+
+  const handleBuyNow = () => {
+    if (isOutOfStock) return;
+    addToCart(product, quantity);
+    navigate('/checkout');
   };
 
   const toggleAccordion = (id: string) => {
@@ -63,63 +69,82 @@ export function ProductPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 1, ease: "easeOut" }}
-      className="flex-1 pt-32 pb-24 bg-background"
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="flex-1 pt-24 sm:pt-32 pb-20 bg-background"
     >
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-16 lg:gap-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
           
-          {/* Surreal Image Gallery */}
-          <div className="lg:w-1/2">
+          {/* Gallery Section */}
+          <div className="w-full lg:w-1/2">
             <div 
-              className="aspect-[3/4] bg-accent/20 rounded-[2rem] overflow-hidden cursor-zoom-in relative group shadow-2xl"
+              className="aspect-[4/5] bg-accent/20 rounded-2xl sm:rounded-3xl overflow-hidden cursor-zoom-in relative group shadow-lg"
               onClick={() => setIsFullscreen(true)}
             >
               <img
                 referrerPolicy="no-referrer"
                 src={images[activeImage] || product.image}
                 alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 fetchPriority="high"
                 loading="eager"
               />
             </div>
+
+            {/* Thumbnail switcher if multiple images */}
+            {images.length > 1 && (
+              <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+                {images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImage(idx)}
+                    className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
+                      activeImage === idx ? 'border-primary shadow-sm' : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info Panel */}
-          <div className="lg:w-1/2 flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-4">
-              <Link to={`/collections/${product.category}`} className="text-xs tracking-[0.2em] text-text-muted hover:text-primary transition-colors uppercase block font-semibold">
+          <div className="w-full lg:w-1/2 flex flex-col">
+            <div className="flex items-center gap-2 mb-3">
+              <Link to={`/collections/${product.category}`} className="text-[11px] tracking-widest text-text-muted hover:text-primary transition-colors uppercase font-semibold">
                 {product.category}
               </Link>
               {product.isBestseller && (
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+                <span className="px-2.5 py-0.5 rounded-md bg-[#1A3626] text-white text-[10px] font-bold uppercase tracking-wider">
                   BEST SELLER
                 </span>
               )}
               {product.isNew && (
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold">
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-700 text-white text-[10px] font-bold uppercase tracking-wider">
                   NEW
                 </span>
               )}
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-primary mb-4">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-primary mb-2">
               {product.name}
             </h1>
-            <p className="text-base md:text-lg text-text-muted mb-6 font-light italic">{product.descriptor}</p>
+            {product.descriptor && (
+              <p className="text-sm sm:text-base text-text-muted mb-4 font-light">{product.descriptor}</p>
+            )}
 
-            <div className="mb-6 flex items-baseline gap-3">
-              <span className="text-3xl font-light text-primary">{formatPrice(product.price)}</span>
+            <div className="mb-5 flex items-baseline gap-3">
+              <span className="text-2xl sm:text-3xl font-bold text-primary">{formatPrice(product.price)}</span>
               {product.regularPrice && product.regularPrice > product.price && (
-                <span className="text-lg text-gray-400 line-through">
+                <span className="text-base sm:text-lg text-gray-400 line-through">
                   {formatPrice(product.regularPrice)}
                 </span>
               )}
             </div>
 
             {/* Stock status indicator */}
-            <div className="mb-8">
+            <div className="mb-6">
               {isOutOfStock ? (
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
                   <XCircle size={14} />
@@ -133,35 +158,55 @@ export function ProductPage() {
               ) : (
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
                   <CheckCircle size={14} />
-                  <span>In Stock • Ready for dispatch</span>
+                  <span>In Stock • Ready for delivery</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-6 mb-12">
-              <div className="flex items-center border border-primary/20 rounded-full h-14 px-2">
+            {/* Quantity and Action Buttons - Minimal & High-End */}
+            <div className="space-y-2.5 mb-8">
+              <div className="flex items-center gap-2.5">
+                {/* Minimalist Step Counter */}
+                <div className="flex items-center border border-black/10 bg-white/80 rounded-xl h-11 px-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={isOutOfStock}
+                    className="w-7 h-7 flex items-center justify-center text-primary hover:bg-black/5 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus size={13} />
+                  </button>
+                  <span className="w-9 text-center font-medium text-sm text-primary">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    disabled={isOutOfStock}
+                    className="w-7 h-7 flex items-center justify-center text-primary hover:bg-black/5 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus size={13} />
+                  </button>
+                </div>
+
+                {/* Minimal Add to Cart */}
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  type="button"
+                  onClick={handleAddToCart}
                   disabled={isOutOfStock}
-                  className="px-4 text-primary hover:opacity-50 disabled:opacity-30"
+                  className="flex-1 bg-white hover:bg-black/[0.02] active:bg-black/[0.04] text-primary border border-black/15 h-11 text-xs font-medium tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                 >
-                  <Minus size={16} />
-                </button>
-                <span className="w-12 text-center font-light text-lg">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  disabled={isOutOfStock}
-                  className="px-4 text-primary hover:opacity-50 disabled:opacity-30"
-                >
-                  <Plus size={16} />
+                  <ShoppingBag size={14} className="opacity-75" />
+                  <span>ADD TO CART</span>
                 </button>
               </div>
+
+              {/* Instant Buy Now Button */}
               <button
-                onClick={handleAddToCart}
+                type="button"
+                onClick={handleBuyNow}
                 disabled={isOutOfStock}
-                className="flex-1 bg-primary text-white h-14 text-xs font-semibold tracking-[0.2em] rounded-full hover:opacity-90 transition-all shadow-xl disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full bg-[#1A3626] hover:bg-[#12271b] active:scale-[0.99] text-white h-12 text-xs sm:text-sm font-medium tracking-widest rounded-xl transition-all shadow-[0_4px_12px_rgba(26,54,38,0.15)] flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                {isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}
+                <span>BUY NOW</span>
               </button>
             </div>
 
@@ -189,14 +234,14 @@ export function ProductPage() {
             <div className="border-t border-primary/10 pt-4 space-y-2">
               {/* Description */}
               <div>
-                <button onClick={() => toggleAccordion('description')} className="w-full flex items-center justify-between py-4 text-xs font-semibold tracking-[0.2em] text-primary">
-                  DESCRIPTION
+                <button onClick={() => toggleAccordion('description')} className="w-full flex items-center justify-between py-4 text-xs font-semibold tracking-wider text-primary cursor-pointer">
+                  <span>DESCRIPTION</span>
                   <ChevronDown size={16} className={`transform transition-transform duration-300 ${activeAccordion === 'description' ? 'rotate-180' : ''}`} />
                 </button>
                 <AnimatePresence>
                   {activeAccordion === 'description' && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <p className="pb-6 text-text-muted leading-relaxed font-light">{product.description}</p>
+                      <p className="pb-6 text-sm text-text-muted leading-relaxed font-light">{product.description}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -205,14 +250,14 @@ export function ProductPage() {
               {/* Ingredients */}
               {product.ingredients && (
                 <div className="border-t border-primary/10">
-                  <button onClick={() => toggleAccordion('ingredients')} className="w-full flex items-center justify-between py-4 text-xs font-semibold tracking-[0.2em] text-primary">
-                    INGREDIENTS & FORMULATION
+                  <button onClick={() => toggleAccordion('ingredients')} className="w-full flex items-center justify-between py-4 text-xs font-semibold tracking-wider text-primary cursor-pointer">
+                    <span>INGREDIENTS & FORMULATION</span>
                     <ChevronDown size={16} className={`transform transition-transform duration-300 ${activeAccordion === 'ingredients' ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {activeAccordion === 'ingredients' && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <p className="pb-6 text-text-muted leading-relaxed font-light whitespace-pre-line">{product.ingredients}</p>
+                        <p className="pb-6 text-sm text-text-muted leading-relaxed font-light whitespace-pre-line">{product.ingredients}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -222,14 +267,14 @@ export function ProductPage() {
               {/* How to use */}
               {product.howToUse && (
                 <div className="border-t border-primary/10">
-                  <button onClick={() => toggleAccordion('howToUse')} className="w-full flex items-center justify-between py-4 text-xs font-semibold tracking-[0.2em] text-primary">
-                    HOW TO USE / RITUAL
+                  <button onClick={() => toggleAccordion('howToUse')} className="w-full flex items-center justify-between py-4 text-xs font-semibold tracking-wider text-primary cursor-pointer">
+                    <span>HOW TO USE / RITUAL</span>
                     <ChevronDown size={16} className={`transform transition-transform duration-300 ${activeAccordion === 'howToUse' ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {activeAccordion === 'howToUse' && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 1 }} className="overflow-hidden">
-                        <p className="pb-6 text-text-muted leading-relaxed font-light whitespace-pre-line">{product.howToUse}</p>
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                        <p className="pb-6 text-sm text-text-muted leading-relaxed font-light whitespace-pre-line">{product.howToUse}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>

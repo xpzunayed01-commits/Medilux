@@ -56,35 +56,35 @@ export function AdminCustomers() {
   return (
     <div className="space-y-6">
       {/* Header & Stats */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customers Database</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Customers Database</h1>
           <p className="text-xs text-gray-500">Profiles, lifetime order history, and contact records</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2 bg-white rounded-xl border border-gray-200 shadow-xs flex items-center gap-2">
-            <Users size={16} className="text-emerald-700" />
+        <div className="grid grid-cols-2 sm:flex items-center gap-2.5 sm:gap-3">
+          <div className="px-3.5 py-2 bg-white rounded-xl border border-gray-200 shadow-xs flex items-center gap-2">
+            <Users size={16} className="text-emerald-700 shrink-0" />
             <div>
-              <span className="text-[10px] text-gray-400 block font-medium">Total Clients</span>
-              <span className="text-xs font-bold text-gray-900">{customers.length} registered</span>
+              <span className="text-[10px] text-gray-400 block font-medium leading-none">Clients</span>
+              <span className="text-xs font-bold text-gray-900 leading-tight">{customers.length}</span>
             </div>
           </div>
 
-          <div className="px-4 py-2 bg-white rounded-xl border border-gray-200 shadow-xs flex items-center gap-2">
-            <DollarSign size={16} className="text-blue-700" />
+          <div className="px-3.5 py-2 bg-white rounded-xl border border-gray-200 shadow-xs flex items-center gap-2">
+            <DollarSign size={16} className="text-blue-700 shrink-0" />
             <div>
-              <span className="text-[10px] text-gray-400 block font-medium">Customer Value</span>
-              <span className="text-xs font-bold text-gray-900">{formatPrice(totalSpentAll)}</span>
+              <span className="text-[10px] text-gray-400 block font-medium leading-none">Value</span>
+              <span className="text-xs font-bold text-gray-900 leading-tight">{formatPrice(totalSpentAll)}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Search bar */}
-      <div className="bg-white p-3 rounded-2xl border border-gray-200/80 flex items-center justify-between">
+      <div className="bg-white p-3 rounded-2xl border border-gray-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
         <div className="relative w-full sm:w-80">
-          <Search size={16} className="absolute left-3.5 top-3 text-gray-400" />
+          <Search size={16} className="absolute left-3.5 top-2.5 sm:top-3 text-gray-400" />
           <input
             type="text"
             placeholder="Search by name, phone, email or city..."
@@ -94,111 +94,171 @@ export function AdminCustomers() {
           />
         </div>
 
-        <span className="text-xs text-gray-500 font-medium hidden sm:block">
+        <span className="text-[11px] sm:text-xs text-gray-500 font-medium">
           {filteredCustomers.length} {filteredCustomers.length === 1 ? 'Customer' : 'Customers'}
         </span>
       </div>
 
-      {/* Customers Table */}
-      <div className="bg-white rounded-3xl border border-gray-200/80 shadow-xs overflow-hidden">
+      {/* Customers Content Area */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs overflow-hidden">
         {filteredCustomers.length === 0 ? (
-          <div className="text-center py-16 px-4">
-            <Users size={44} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-base font-bold text-gray-800">No customers found</p>
+          <div className="text-center py-12 sm:py-16 px-4">
+            <Users size={40} className="mx-auto text-gray-300 mb-3" />
+            <p className="text-sm sm:text-base font-bold text-gray-800">No customers found</p>
             <p className="text-xs text-gray-400 mt-1">
               Customer profiles will be automatically created whenever orders are placed.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <tr>
-                  <th className="py-3.5 px-4">Customer</th>
-                  <th className="py-3.5 px-4">Contact</th>
-                  <th className="py-3.5 px-4">Delivery Location</th>
-                  <th className="py-3.5 px-4">Total Orders</th>
-                  <th className="py-3.5 px-4">Lifetime Spent</th>
-                  <th className="py-3.5 px-4">Last Order</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredCustomers.map((customer) => (
-                  <tr key={customer.id} className="hover:bg-gray-50/80 transition-colors">
-                    {/* Name & Avatar */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center uppercase shrink-0">
-                          {customer.name ? customer.name.charAt(0) : 'U'}
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900 text-xs">{customer.name}</p>
-                          <p className="text-[11px] text-gray-400">{customer.email || 'No email provided'}</p>
-                        </div>
+          <>
+            {/* Mobile View (< md screens) */}
+            <div className="md:hidden divide-y divide-gray-100">
+              {filteredCustomers.map((customer) => (
+                <div key={customer.id} className="p-3.5 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center uppercase shrink-0">
+                        {customer.name ? customer.name.charAt(0) : 'U'}
                       </div>
-                    </td>
-
-                    {/* Phone & Direct links */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={`tel:${customer.phone}`}
-                          className="text-xs font-semibold text-gray-900 hover:text-emerald-700"
-                        >
-                          {customer.phone}
-                        </a>
-                        <a
-                          href={`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="p-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-md"
-                          title="WhatsApp Chat"
-                        >
-                          <MessageCircle size={13} />
-                        </a>
+                      <div className="min-w-0">
+                        <p className="font-bold text-gray-900 text-xs truncate">{customer.name}</p>
+                        <p className="text-[11px] text-gray-500">{customer.phone}</p>
                       </div>
-                    </td>
+                    </div>
 
-                    {/* Address & City */}
-                    <td className="py-3.5 px-4 text-xs text-gray-600 max-w-[200px] truncate">
-                      {customer.address ? `${customer.address}, ${customer.city || ''}` : customer.city || 'Dhaka'}
-                    </td>
-
-                    {/* Total Orders */}
-                    <td className="py-3.5 px-4 text-xs font-bold text-gray-900">
-                      <span className="px-2.5 py-1 bg-gray-100 rounded-full">
-                        {customer.totalOrders} {customer.totalOrders === 1 ? 'order' : 'orders'}
-                      </span>
-                    </td>
-
-                    {/* Lifetime Spend */}
-                    <td className="py-3.5 px-4 text-xs font-bold text-emerald-700">
+                    <span className="text-xs font-bold text-emerald-700 shrink-0">
                       {formatPrice(customer.totalSpent)}
-                    </td>
+                    </span>
+                  </div>
 
-                    {/* Last Order Date */}
-                    <td className="py-3.5 px-4 text-xs text-gray-500 whitespace-nowrap">
-                      {customer.lastOrderDate
-                        ? new Date(customer.lastOrderDate).toLocaleDateString('en-BD', { month: 'short', day: 'numeric', year: 'numeric' })
-                        : 'N/A'}
-                    </td>
+                  <div className="flex items-center justify-between text-[11px] text-gray-500 bg-gray-50 p-2 rounded-xl">
+                    <span>{customer.totalOrders} {customer.totalOrders === 1 ? 'Order' : 'Orders'}</span>
+                    <span className="truncate max-w-[150px]">{customer.city || customer.address || 'Dhaka'}</span>
+                  </div>
 
-                    {/* Actions */}
-                    <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedCustomer(customer)}
-                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ml-auto"
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`tel:${customer.phone}`}
+                        className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-medium flex items-center gap-1"
                       >
-                        <Eye size={13} />
-                        <span>History</span>
-                      </button>
-                    </td>
+                        <Phone size={12} />
+                        <span>Call</span>
+                      </a>
+                      <a
+                        href={`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium flex items-center gap-1"
+                      >
+                        <MessageCircle size={12} />
+                        <span>WhatsApp</span>
+                      </a>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedCustomer(customer)}
+                      className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-xs font-semibold flex items-center gap-1"
+                    >
+                      <Eye size={12} />
+                      <span>History</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View (>= md screens) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <tr>
+                    <th className="py-3.5 px-4">Customer</th>
+                    <th className="py-3.5 px-4">Contact</th>
+                    <th className="py-3.5 px-4">Delivery Location</th>
+                    <th className="py-3.5 px-4">Total Orders</th>
+                    <th className="py-3.5 px-4">Lifetime Spent</th>
+                    <th className="py-3.5 px-4">Last Order</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredCustomers.map((customer) => (
+                    <tr key={customer.id} className="hover:bg-gray-50/80 transition-colors">
+                      {/* Name & Avatar */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center uppercase shrink-0">
+                            {customer.name ? customer.name.charAt(0) : 'U'}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 text-xs">{customer.name}</p>
+                            <p className="text-[11px] text-gray-400">{customer.email || 'No email provided'}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Phone & Direct links */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`tel:${customer.phone}`}
+                            className="text-xs font-semibold text-gray-900 hover:text-emerald-700"
+                          >
+                            {customer.phone}
+                          </a>
+                          <a
+                            href={`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-md"
+                            title="WhatsApp Chat"
+                          >
+                            <MessageCircle size={13} />
+                          </a>
+                        </div>
+                      </td>
+
+                      {/* Address & City */}
+                      <td className="py-3.5 px-4 text-xs text-gray-600 max-w-[200px] truncate">
+                        {customer.address ? `${customer.address}, ${customer.city || ''}` : customer.city || 'Dhaka'}
+                      </td>
+
+                      {/* Total Orders */}
+                      <td className="py-3.5 px-4 text-xs font-bold text-gray-900">
+                        <span className="px-2.5 py-1 bg-gray-100 rounded-full">
+                          {customer.totalOrders} {customer.totalOrders === 1 ? 'order' : 'orders'}
+                        </span>
+                      </td>
+
+                      {/* Lifetime Spend */}
+                      <td className="py-3.5 px-4 text-xs font-bold text-emerald-700">
+                        {formatPrice(customer.totalSpent)}
+                      </td>
+
+                      {/* Last Order Date */}
+                      <td className="py-3.5 px-4 text-xs text-gray-500 whitespace-nowrap">
+                        {customer.lastOrderDate
+                          ? new Date(customer.lastOrderDate).toLocaleDateString('en-BD', { month: 'short', day: 'numeric', year: 'numeric' })
+                          : 'N/A'}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          onClick={() => setSelectedCustomer(customer)}
+                          className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ml-auto"
+                        >
+                          <Eye size={13} />
+                          <span>History</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

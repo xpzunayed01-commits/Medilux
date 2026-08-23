@@ -75,16 +75,21 @@ export function CollectionPage() {
       </section>
 
       {/* Product Grid */}
-      <AnimatedSection className="py-24 px-6">
+      <AnimatedSection className="py-10 sm:py-20 px-3 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-24">
-              <p className="text-text-muted">NO PRODUCTS FOUND IN THIS COLLECTION.</p>
+            <div className="text-center py-20 bg-white/50 rounded-2xl border border-black/5 p-8">
+              <p className="text-text-muted text-sm font-medium">NO PRODUCTS FOUND IN THIS COLLECTION.</p>
+              <Link to="/shop" className="inline-block mt-4 text-xs font-bold text-emerald-800 underline underline-offset-4">
+                Explore All Products
+              </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <div key={product.id} className="h-full">
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           )}

@@ -68,7 +68,7 @@ function setLocalCache<T>(key: string, data: T) {
 // Default content configuration
 export const defaultSiteContent: SiteContent = {
   heroTitle: 'EVERYDAY,\nELEVATED.',
-  heroSubtitle: 'Surreal, artistic wellness and lifestyle rituals.',
+  heroSubtitle: '',
   heroImage: 'https://i.postimg.cc/nzJnVXkz/Picsart-26-08-22-17-53-33-572.jpg',
   heroButtonText: 'SHOP NOW',
   heroButtonLink: '/shop',
@@ -494,11 +494,15 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
     setLocalCache(CACHE_ORDERS_KEY, currentOrders);
   }
 
-  const orderRef = doc(db, 'orders', orderId);
-  await updateDoc(orderRef, {
-    status,
-    updatedAt: new Date().toISOString(),
-  });
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    await updateDoc(orderRef, {
+      status,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn('Notice updating order status in Firestore, updated locally:', err);
+  }
 }
 
 export async function deleteOrder(orderId: string) {
@@ -506,7 +510,11 @@ export async function deleteOrder(orderId: string) {
   const updated = currentOrders.filter((o) => o.id !== orderId);
   setLocalCache(CACHE_ORDERS_KEY, updated);
 
-  await deleteDoc(doc(db, 'orders', orderId));
+  try {
+    await deleteDoc(doc(db, 'orders', orderId));
+  } catch (err) {
+    console.warn('Notice deleting order from Firestore, removed locally:', err);
+  }
 }
 
 // ---------------- CUSTOMERS ----------------
