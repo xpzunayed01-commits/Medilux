@@ -73,8 +73,8 @@ export function Home() {
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-primary leading-[0.9] mb-8 floating">
             EVERYDAY,<br />ELEVATED.
           </h1>
-          <div className="flex items-center gap-6 justify-start">
-            <Link to="/shop" className="px-10 py-4 bg-primary text-white text-xs font-semibold tracking-widest rounded-full hover:bg-primary/90 transition-all">SHOP NOW</Link>
+          <div className="flex items-center gap-6 justify-start mt-10">
+            <Link to="/shop" className="px-10 py-4 bg-primary text-white text-xs font-semibold tracking-widest rounded-full hover:bg-primary/90 transition-all whitespace-nowrap">SHOP NOW</Link>
             <Link to="/about" className="px-10 py-4 bg-white/50 backdrop-blur-md text-primary text-xs font-semibold tracking-widest rounded-full hover:bg-white/80 transition-all">EXPLORE</Link>
           </div>
         </motion.div>

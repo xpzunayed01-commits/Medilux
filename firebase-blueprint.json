@@ -1,0 +1,84 @@
+{
+  "entities": {
+    "admin": {
+      "title": "Admin",
+      "description": "Administrator account",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "uid": { "type": "string" }
+      },
+      "required": ["email", "uid"]
+    },
+    "product": {
+      "title": "Product",
+      "description": "E-commerce product",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "status": { "type": "string", "enum": ["published", "draft"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "slug", "price", "stock", "status", "createdAt"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "Customer order",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string", "enum": ["new", "confirmed", "processing", "shipped", "delivered", "cancelled"] },
+        "customerId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["orderId", "total", "status", "customerId", "createdAt"]
+    },
+    "customer": {
+      "title": "Customer",
+      "description": "Customer profile from order",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" }
+      },
+      "required": ["email", "name"]
+    },
+    "auditLog": {
+      "title": "AuditLog",
+      "description": "Admin activity log",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "adminId": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["action", "adminId", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": "admin",
+      "description": "List of administrators"
+    },
+    "/products/{productId}": {
+      "schema": "product",
+      "description": "Product catalog"
+    },
+    "/orders/{orderId}": {
+      "schema": "order",
+      "description": "Customer orders"
+    },
+    "/customers/{customerId}": {
+      "schema": "customer",
+      "description": "Customer profiles"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "auditLog",
+      "description": "Admin activity logs"
+    }
+  }
+}

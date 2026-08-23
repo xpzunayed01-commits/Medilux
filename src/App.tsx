@@ -16,25 +16,33 @@ const CartPage = lazy(() => import('./pages/CartPage').then(module => ({ default
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(module => ({ default: module.CheckoutPage })));
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation').then(module => ({ default: module.OrderConfirmation })));
 const About = lazy(() => import('./pages/About').then(module => ({ default: module.About })));
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(module => ({ default: module.AdminLogin })));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
 
 export default function App() {
   return (
     <CartProvider>
-      <Layout>
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div></div>}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<CollectionPage />} />
-            <Route path="/collections" element={<Navigate to="/shop" replace />} />
-            <Route path="/collections/:id" element={<CollectionPage />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/order-confirmation" element={<OrderConfirmation />} />
-            <Route path="/about" element={<About />} />
-          </Routes>
-        </Suspense>
-      </Layout>
+      <Routes>
+        <Route path="/xpzunayed" element={<AdminLogin />} />
+        <Route path="/xpzunayed/dashboard" element={<AdminDashboard />} />
+        <Route path="*" element={
+          <Layout>
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div></div>}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/shop" element={<CollectionPage />} />
+                <Route path="/collections" element={<Navigate to="/shop" replace />} />
+                <Route path="/collections/:id" element={<CollectionPage />} />
+                <Route path="/product/:id" element={<ProductPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                <Route path="/about" element={<About />} />
+              </Routes>
+            </Suspense>
+          </Layout>
+        } />
+      </Routes>
     </CartProvider>
   );
 }
