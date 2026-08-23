@@ -14,9 +14,9 @@ export function AdminLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate('/xpzunayed/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed', error);
-      alert('Invalid credentials - Please ensure you are authorized to access this portal.');
+      alert(`Login Failed: ${error.message}`);
     }
   };
 
