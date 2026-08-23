@@ -18,13 +18,17 @@ const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation').then(mo
 const About = lazy(() => import('./pages/About').then(module => ({ default: module.About })));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(module => ({ default: module.AdminLogin })));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then(module => ({ default: module.AdminLayout })));
 
 export default function App() {
   return (
     <CartProvider>
       <Routes>
         <Route path="/xpzunayed" element={<AdminLogin />} />
-        <Route path="/xpzunayed/dashboard" element={<AdminDashboard />} />
+        <Route path="/xpzunayed/*" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          {/* Add more routes here */}
+        </Route>
         <Route path="*" element={
           <Layout>
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div></div>}>
