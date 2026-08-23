@@ -5,8 +5,8 @@ import { auth } from '../../lib/firebase';
 import { Lock, Mail } from 'lucide-react';
 
 export function AdminLogin() {
-  const [email, setEmail] = useState('xpeee01@gmail.com');
-  const [password, setPassword] = useState('Champa01626538051');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -16,7 +16,7 @@ export function AdminLogin() {
       navigate('/xpzunayed/dashboard');
     } catch (error) {
       console.error('Login failed', error);
-      alert('Invalid credentials');
+      alert('Invalid credentials - Please ensure you are authorized to access this portal.');
     }
   };
 
@@ -27,11 +27,11 @@ export function AdminLogin() {
         <div className="space-y-4">
           <div className="relative">
             <Mail className="absolute left-3 top-3 text-gray-400" size={18} />
-            <input type="email" placeholder="Email" defaultValue="xpeee01@gmail.com" className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:outline-none" onChange={e => setEmail(e.target.value)} />
+            <input type="email" placeholder="Email" className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:outline-none" onChange={e => setEmail(e.target.value)} />
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
-            <input type="password" placeholder="Password" defaultValue="Champa01626538051" className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:outline-none" onChange={e => setPassword(e.target.value)} />
+            <input type="password" placeholder="Password" className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:outline-none" onChange={e => setPassword(e.target.value)} />
           </div>
         </div>
         <button type="submit" className="w-full mt-8 py-3 bg-green-900 text-white rounded-xl font-semibold hover:bg-green-800 transition-colors">SIGN IN</button>
