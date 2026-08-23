@@ -20,13 +20,17 @@ export function AdminSettings() {
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const unsub = subscribeToSiteSettings((data) => {
-      setSettings(data);
+      if (!isInitialized) {
+        setSettings(data);
+        setIsInitialized(true);
+      }
     });
     return () => unsub();
-  }, []);
+  }, [isInitialized]);
 
   const handleChange = (field: keyof SiteSettings, value: any) => {
     setSettings((prev) => ({
@@ -35,8 +39,8 @@ export function AdminSettings() {
     }));
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     try {
       setSaving(true);
       await saveSiteSettings(settings);

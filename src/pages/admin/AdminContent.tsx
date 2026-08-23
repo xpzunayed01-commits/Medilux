@@ -17,13 +17,17 @@ export function AdminContent() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const unsub = subscribeToSiteContent((data) => {
-      setContent(data);
+      if (!isInitialized) {
+        setContent(data);
+        setIsInitialized(true);
+      }
     });
     return () => unsub();
-  }, []);
+  }, [isInitialized]);
 
   const handleChange = (field: keyof SiteContent, value: any) => {
     setContent((prev) => ({
@@ -32,8 +36,8 @@ export function AdminContent() {
     }));
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     try {
       setSaving(true);
       await saveSiteContent(content);

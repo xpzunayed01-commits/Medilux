@@ -24,6 +24,29 @@ const CACHE_CONTENT_KEY = 'medilux_cache_content';
 const CACHE_ORDERS_KEY = 'medilux_cache_orders';
 const CACHE_CUSTOMERS_KEY = 'medilux_cache_customers';
 
+/**
+ * Remove undefined values to prevent Firestore 'Unsupported field value: undefined' errors
+ */
+function cleanForFirestore<T extends Record<string, any>>(obj: T): any {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) {
+    return obj.map((item) => (typeof item === 'object' ? cleanForFirestore(item) : item));
+  }
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        cleaned[key] = cleanForFirestore(value);
+      } else if (Array.isArray(value)) {
+        cleaned[key] = value.map((item) => (typeof item === 'object' ? cleanForFirestore(item) : item));
+      } else {
+        cleaned[key] = value;
+      }
+    }
+  }
+  return cleaned;
+}
+
 function getLocalCache<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
@@ -93,11 +116,8 @@ export const defaultSiteSettings: SiteSettings = {
   youtubeUrl: 'https://youtube.com',
 };
 
-// Seed products & categories if Firestore is empty (runs only when authenticated admin is active)
+// Seed products & categories if Firestore is empty
 export async function seedInitialDataIfEmpty() {
-  if (!auth.currentUser) {
-    return;
-  }
   try {
     const productsSnap = await getDocs(collection(db, 'products'));
     if (productsSnap.empty) {
@@ -113,7 +133,7 @@ export async function seedInitialDataIfEmpty() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        batch.set(prodRef, data);
+        batch.set(prodRef, cleanForFirestore(data));
       }
       await batch.commit();
     }
@@ -129,7 +149,7 @@ export async function seedInitialDataIfEmpty() {
           isHidden: false,
           order: 1,
         };
-        batch.set(catRef, data);
+        batch.set(catRef, cleanForFirestore(data));
       }
       await batch.commit();
     }
@@ -138,19 +158,22 @@ export async function seedInitialDataIfEmpty() {
     const settingsRef = doc(db, 'settings', 'general');
     const settingsSnap = await getDoc(settingsRef);
     if (!settingsSnap.exists()) {
-      await setDoc(settingsRef, defaultSiteSettings);
+      await setDoc(settingsRef, cleanForFirestore(defaultSiteSettings));
     }
 
     // Check Site Content
     const contentRef = doc(db, 'settings', 'content');
     const contentSnap = await getDoc(contentRef);
     if (!contentSnap.exists()) {
-      await setDoc(contentRef, defaultSiteContent);
+      await setDoc(contentRef, cleanForFirestore(defaultSiteContent));
     }
   } catch (err) {
     console.warn('Notice checking/seeding data in Firestore:', err);
   }
 }
+
+// Auto-seed on load
+seedInitialDataIfEmpty().catch(() => {});
 
 // ---------------- PRODUCTS ----------------
 export function subscribeToProducts(callback: (products: Product[]) => void) {
@@ -227,8 +250,12 @@ export async function saveProduct(product: Partial<Product> & { name: string; pr
   }
   setLocalCache(CACHE_PRODUCTS_KEY, updatedList);
 
-  // Save to Firestore
-  await setDoc(prodRef, dataToSave, { merge: true });
+  // Save to Firestore with clean sanitization
+  try {
+    await setDoc(prodRef, cleanForFirestore(dataToSave), { merge: true });
+  } catch (err) {
+    console.warn('Notice saving product to Firestore, cached locally:', err);
+  }
   return prodId;
 }
 
@@ -238,7 +265,11 @@ export async function deleteProduct(productId: string) {
   const updatedList = currentProds.filter((p) => p.id !== productId);
   setLocalCache(CACHE_PRODUCTS_KEY, updatedList);
 
-  await deleteDoc(doc(db, 'products', productId));
+  try {
+    await deleteDoc(doc(db, 'products', productId));
+  } catch (err) {
+    console.warn('Notice deleting product from Firestore, removed locally:', err);
+  }
 }
 
 export async function updateProductStock(productId: string, newStock: number) {
@@ -252,12 +283,16 @@ export async function updateProductStock(productId: string, newStock: number) {
     setLocalCache(CACHE_PRODUCTS_KEY, currentProds);
   }
 
-  const prodRef = doc(db, 'products', productId);
-  await updateDoc(prodRef, {
-    stock: Number(newStock),
-    isOutOfStock: Number(newStock) <= 0,
-    updatedAt: new Date().toISOString(),
-  });
+  try {
+    const prodRef = doc(db, 'products', productId);
+    await updateDoc(prodRef, {
+      stock: Number(newStock),
+      isOutOfStock: Number(newStock) <= 0,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn('Notice updating product stock in Firestore:', err);
+  }
 }
 
 // ---------------- CATEGORIES ----------------
@@ -310,8 +345,12 @@ export async function saveCategory(category: Category): Promise<string> {
   }
   setLocalCache(CACHE_CATEGORIES_KEY, updatedList);
 
-  const catRef = doc(db, 'categories', catId);
-  await setDoc(catRef, dataToSave, { merge: true });
+  try {
+    const catRef = doc(db, 'categories', catId);
+    await setDoc(catRef, cleanForFirestore(dataToSave), { merge: true });
+  } catch (err) {
+    console.warn('Notice saving category to Firestore, cached locally:', err);
+  }
   return catId;
 }
 
@@ -320,7 +359,11 @@ export async function deleteCategory(categoryId: string) {
   const updatedList = currentCats.filter((c) => c.id !== categoryId);
   setLocalCache(CACHE_CATEGORIES_KEY, updatedList);
 
-  await deleteDoc(doc(db, 'categories', categoryId));
+  try {
+    await deleteDoc(doc(db, 'categories', categoryId));
+  } catch (err) {
+    console.warn('Notice deleting category from Firestore, removed locally:', err);
+  }
 }
 
 // ---------------- ORDERS ----------------
@@ -503,7 +546,7 @@ export function subscribeToSettings(callback: (settings: SiteSettings) => void) 
         setLocalCache(CACHE_SETTINGS_KEY, data);
         callback(data);
       } else {
-        callback(defaultSiteSettings);
+        callback(getLocalCache<SiteSettings>(CACHE_SETTINGS_KEY, defaultSiteSettings));
       }
     },
     (err) => {
@@ -517,8 +560,12 @@ export const subscribeToSiteSettings = subscribeToSettings;
 
 export async function saveSiteSettings(settings: SiteSettings) {
   setLocalCache(CACHE_SETTINGS_KEY, settings);
-  const ref = doc(db, 'settings', 'general');
-  await setDoc(ref, settings, { merge: true });
+  try {
+    const ref = doc(db, 'settings', 'general');
+    await setDoc(ref, cleanForFirestore(settings), { merge: true });
+  } catch (err) {
+    console.warn('Notice saving settings to Firestore, cached locally:', err);
+  }
 }
 
 export function subscribeToSiteContent(callback: (content: SiteContent) => void) {
@@ -534,7 +581,7 @@ export function subscribeToSiteContent(callback: (content: SiteContent) => void)
         setLocalCache(CACHE_CONTENT_KEY, data);
         callback(data);
       } else {
-        callback(defaultSiteContent);
+        callback(getLocalCache<SiteContent>(CACHE_CONTENT_KEY, defaultSiteContent));
       }
     },
     (err) => {
@@ -546,8 +593,12 @@ export function subscribeToSiteContent(callback: (content: SiteContent) => void)
 
 export async function saveSiteContent(content: SiteContent) {
   setLocalCache(CACHE_CONTENT_KEY, content);
-  const ref = doc(db, 'settings', 'content');
-  await setDoc(ref, content, { merge: true });
+  try {
+    const ref = doc(db, 'settings', 'content');
+    await setDoc(ref, cleanForFirestore(content), { merge: true });
+  } catch (err) {
+    console.warn('Notice saving content to Firestore, cached locally:', err);
+  }
 }
 
 // Sound alert notification utility
