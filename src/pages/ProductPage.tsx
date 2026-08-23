@@ -3,20 +3,27 @@ import { useParams, Link } from 'react-router-dom';
 import { products as fallbackProducts } from '../data';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../lib/utils';
-import { Plus, Minus, ChevronDown, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { Plus, Minus, ChevronDown, CheckCircle, AlertTriangle, XCircle, Truck, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { subscribeToProducts } from '../lib/dataService';
-import { Product } from '../types';
+import { subscribeToProducts, subscribeToSiteSettings, defaultSiteSettings } from '../lib/dataService';
+import { Product, SiteSettings } from '../types';
 
 export function ProductPage() {
   const { id } = useParams();
   const [productsList, setProductsList] = useState<Product[]>(fallbackProducts);
+  const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
 
   useEffect(() => {
-    const unsub = subscribeToProducts((data) => {
+    const unsubProds = subscribeToProducts((data) => {
       if (data && data.length > 0) setProductsList(data);
     });
-    return () => unsub();
+    const unsubSettings = subscribeToSiteSettings((s) => {
+      if (s) setSettings(s);
+    });
+    return () => {
+      unsubProds();
+      unsubSettings();
+    };
   }, []);
 
   const product = productsList.find((p) => p.id === id) || fallbackProducts.find((p) => p.id === id);
@@ -156,6 +163,26 @@ export function ProductPage() {
               >
                 {isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}
               </button>
+            </div>
+
+            {/* Modern Delivery & Authenticity Perks */}
+            <div className="bg-[#F9F8F6] border border-black/5 rounded-2xl p-4 mb-8 space-y-3">
+              <div className="flex items-center gap-3 text-xs text-gray-800">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+                  <Truck size={13} />
+                </div>
+                <span>
+                  <strong className="font-semibold text-emerald-950">Free Nationwide Delivery</strong> on orders over {formatPrice(settings.freeDeliveryThreshold ?? 3000)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-gray-800">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck size={13} />
+                </div>
+                <span>
+                  <strong className="font-semibold text-emerald-950">Cash on Delivery</strong> available across all 64 districts
+                </span>
+              </div>
             </div>
 
             {/* Accordions */}

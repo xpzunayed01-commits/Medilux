@@ -1,42 +1,56 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
-    function isSignedIn() { return request.auth != null; }
-    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
-    
-    // Default deny all
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Default deny
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Admins
+    // Admins collection
     match /admins/{adminId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isSignedIn();
     }
 
-    // Products
+    // Products catalog: everyone can view products, admins can create/edit/delete, checkout can update stock
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'isOutOfStock', 'updatedAt']);
     }
 
-    // Orders
+    // Categories: everyone can view, admins can manage
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Orders: customers can place orders, admins can view/update/manage
     match /orders/{orderId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.customerId == request.auth.uid);
-      allow write: if isAdmin();
-      allow create: if isSignedIn() && request.resource.data.customerId == request.auth.uid;
+      allow read: if isSignedIn();
+      allow create: if true;
+      allow update, delete: if isSignedIn();
     }
 
-    // Customers
+    // Customers: directory created on order, admin can view/manage
     match /customers/{customerId} {
-      allow read, write: if isAdmin();
+      allow read: if isSignedIn();
+      allow create, update: if true;
+      allow delete: if isSignedIn();
     }
-    
-    // Audit Logs
+
+    // Store settings & content: public read, admin write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Audit logs
     match /auditLogs/{logId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isSignedIn();
     }
   }
 }

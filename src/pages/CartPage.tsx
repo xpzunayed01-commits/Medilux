@@ -1,10 +1,24 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../lib/utils';
 import { Minus, Plus, ShoppingBag } from 'lucide-react';
+import { FreeDeliveryProgress } from '../components/FreeDeliveryProgress';
+import { subscribeToSiteSettings, defaultSiteSettings } from '../lib/dataService';
+import { SiteSettings } from '../types';
 
 export function CartPage() {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
+
+  useEffect(() => {
+    const unsub = subscribeToSiteSettings((data) => {
+      if (data) setSettings(data);
+    });
+    return () => unsub();
+  }, []);
+
+  const freeThreshold = settings.freeDeliveryThreshold ?? 3000;
 
   if (items.length === 0) {
     return (
@@ -97,17 +111,19 @@ export function CartPage() {
 
           {/* Order Summary */}
           <div className="lg:w-1/3">
-            <div className="bg-[#F2F0EB] p-8 rounded-lg sticky top-32">
-              <h2 className="text-lg font-medium tracking-wide mb-8">ORDER SUMMARY</h2>
+            <div className="bg-[#F2F0EB] p-8 rounded-2xl sticky top-32 space-y-6">
+              <h2 className="text-lg font-medium tracking-wide">ORDER SUMMARY</h2>
+
+              <FreeDeliveryProgress currentAmount={cartTotal} variant="expanded" />
               
-              <div className="space-y-4 mb-8 text-sm">
+              <div className="space-y-4 text-sm border-t border-black/10 pt-6">
                 <div className="flex justify-between">
                   <span className="text-text-muted">Subtotal</span>
                   <span>{formatPrice(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Delivery</span>
-                  <span>Calculated at checkout</span>
+                  <span>{cartTotal >= freeThreshold ? <span className="text-emerald-700 font-bold">FREE</span> : 'Calculated at checkout'}</span>
                 </div>
               </div>
 

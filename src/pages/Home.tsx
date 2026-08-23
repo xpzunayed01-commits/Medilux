@@ -1,21 +1,26 @@
 import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { Truck, ShieldCheck, Banknote, Clock, Sparkles } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { 
   subscribeToProducts, 
   subscribeToCategories, 
   subscribeToSiteContent,
-  defaultSiteContent 
+  subscribeToSiteSettings,
+  defaultSiteContent,
+  defaultSiteSettings
 } from '../lib/dataService';
-import { Product, Category, SiteContent } from '../types';
+import { Product, Category, SiteContent, SiteSettings } from '../types';
 import { products as fallbackProducts, categories as fallbackCategories } from '../data';
+import { formatPrice } from '../lib/utils';
 
 export function Home() {
   const [productsList, setProductsList] = useState<Product[]>(fallbackProducts);
   const [categoriesList, setCategoriesList] = useState<Category[]>(fallbackCategories);
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
+  const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
 
   useEffect(() => {
     const unsubProds = subscribeToProducts((data) => {
@@ -27,11 +32,15 @@ export function Home() {
     const unsubContent = subscribeToSiteContent((data) => {
       if (data) setContent(data);
     });
+    const unsubSettings = subscribeToSiteSettings((data) => {
+      if (data) setSettings(data);
+    });
 
     return () => {
       unsubProds();
       unsubCats();
       unsubContent();
+      unsubSettings();
     };
   }, []);
 
@@ -78,13 +87,6 @@ export function Home() {
 
   return (
     <div className="flex flex-col bg-background text-text-main">
-      {/* Promo Bar if active */}
-      {content.promoBarActive && content.promoBarText && (
-        <div className="bg-[#0F2417] text-emerald-200 text-xs py-2 px-4 text-center font-medium tracking-wide">
-          {content.promoBarText}
-        </div>
-      )}
-
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -103,7 +105,7 @@ export function Home() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="relative z-10 text-left w-full px-8 md:px-16"
+          className="relative z-10 text-left w-full px-8 md:px-16 pt-16"
         >
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-primary leading-[0.9] mb-8 floating whitespace-pre-line">
             {content.heroTitle || "EVERYDAY,\nELEVATED."}
@@ -126,6 +128,53 @@ export function Home() {
             </Link>
           </div>
         </motion.div>
+      </section>
+
+      {/* Modern Luxury Perks Strip */}
+      <section className="border-y border-black/5 bg-[#F9F8F6] py-5 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-100/80 text-emerald-800 flex items-center justify-center flex-shrink-0">
+              <Truck size={17} />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-bold text-primary">{content.perkDeliveryTitle || 'Free Delivery'}</p>
+              <p className="text-[11px] text-text-muted">
+                {settings.freeDeliveryThreshold ? `On orders over ${formatPrice(settings.freeDeliveryThreshold)}` : (content.perkDeliverySubtitle || 'On orders over ৳3,000')}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-100/80 text-emerald-800 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck size={17} />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-bold text-primary">{content.perkAuthenticTitle || '100% Authentic'}</p>
+              <p className="text-[11px] text-text-muted">{content.perkAuthenticSubtitle || 'Direct formulation & care'}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-100/80 text-emerald-800 flex items-center justify-center flex-shrink-0">
+              <Banknote size={17} />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-bold text-primary">{content.perkCodTitle || 'Cash on Delivery'}</p>
+              <p className="text-[11px] text-text-muted">{content.perkCodSubtitle || 'Available nationwide'}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-100/80 text-emerald-800 flex items-center justify-center flex-shrink-0">
+              <Clock size={17} />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-bold text-primary">{content.perkSupportTitle || 'Fast Dispatch'}</p>
+              <p className="text-[11px] text-text-muted">{content.perkSupportSubtitle || 'Within 24-48 hours'}</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Surreal Category Scene */}

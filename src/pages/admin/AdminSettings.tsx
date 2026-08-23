@@ -224,7 +224,7 @@ export function AdminSettings() {
 
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                Free Shipping Over (৳)
+                Free Shipping Threshold (৳)
               </label>
               <input
                 type="number"
@@ -234,53 +234,53 @@ export function AdminSettings() {
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               />
             </div>
+
+            <div className="sm:col-span-3">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                Free Delivery Banner / Note Text
+              </label>
+              <input
+                type="text"
+                value={settings.freeDeliveryText || ''}
+                onChange={(e) => handleChange('freeDeliveryText', e.target.value)}
+                placeholder="e.g. Free Nationwide Delivery on orders over ৳3,000"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
 
-        {/* 3. Payment Methods */}
+        {/* 3. Payment Method: Cash on Delivery */}
         <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-xs space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
             <CreditCard size={18} className="text-emerald-700" />
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-              Payment Methods & Instructions
+              Payment Method (Cash on Delivery)
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2 p-3.5 bg-gray-50 rounded-2xl border border-gray-200">
-              <label className="flex items-center gap-3 cursor-pointer text-xs font-bold text-gray-800">
+          <div className="space-y-4">
+            <div className="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200">
+              <label className="flex items-center gap-3 cursor-pointer text-xs font-bold text-emerald-950">
                 <input
                   type="checkbox"
                   checked={settings.codEnabled}
                   onChange={(e) => handleChange('codEnabled', e.target.checked)}
                   className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                 />
-                <span>Enable Cash on Delivery (COD) across all regions</span>
+                <span>Active: Cash on Delivery (COD) as primary & sole payment method across all 64 districts</span>
               </label>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                bKash Merchant / Personal Number
+                COD Customer Instructions / Checkout Note
               </label>
               <input
                 type="text"
-                value={settings.bkashNumber || ''}
-                onChange={(e) => handleChange('bkashNumber', e.target.value)}
-                placeholder="01834037142"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                bKash Instructions
-              </label>
-              <input
-                type="text"
-                value={settings.bkashInstructions || ''}
-                onChange={(e) => handleChange('bkashInstructions', e.target.value)}
-                placeholder="Send money to the number and enter TrxID in notes"
+                value={settings.codInstructions || ''}
+                onChange={(e) => handleChange('codInstructions', e.target.value)}
+                placeholder="Pay with cash upon delivery of your parcel at your doorstep"
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               />
             </div>

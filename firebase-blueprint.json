@@ -12,51 +12,108 @@
     },
     "product": {
       "title": "Product",
-      "description": "E-commerce product",
+      "description": "E-commerce product entity",
       "type": "object",
       "properties": {
+        "id": { "type": "string" },
         "name": { "type": "string" },
-        "slug": { "type": "string" },
+        "descriptor": { "type": "string" },
+        "description": { "type": "string" },
         "price": { "type": "number" },
+        "regularPrice": { "type": "number" },
+        "image": { "type": "string" },
+        "images": { "type": "array" },
+        "category": { "type": "string" },
         "stock": { "type": "number" },
-        "status": { "type": "string", "enum": ["published", "draft"] },
-        "createdAt": { "type": "string" }
+        "isNew": { "type": "boolean" },
+        "isBestseller": { "type": "boolean" },
+        "isFeatured": { "type": "boolean" },
+        "isOutOfStock": { "type": "boolean" },
+        "ingredients": { "type": "string" },
+        "howToUse": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
       },
-      "required": ["name", "slug", "price", "stock", "status", "createdAt"]
+      "required": ["name", "price", "category"]
+    },
+    "category": {
+      "title": "Category",
+      "description": "Product collection category",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "isHidden": { "type": "boolean" },
+        "order": { "type": "number" }
+      },
+      "required": ["name", "description", "image"]
     },
     "order": {
       "title": "Order",
-      "description": "Customer order",
+      "description": "Customer purchase order",
       "type": "object",
       "properties": {
-        "orderId": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "streetAddress": { "type": "string" },
+        "city": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "notes": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "deliveryFee": { "type": "number" },
         "total": { "type": "number" },
-        "status": { "type": "string", "enum": ["new", "confirmed", "processing", "shipped", "delivered", "cancelled"] },
-        "customerId": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "status": { "type": "string" },
         "createdAt": { "type": "string" }
       },
-      "required": ["orderId", "total", "status", "customerId", "createdAt"]
+      "required": ["orderNumber", "customerName", "customerPhone", "streetAddress", "city", "items", "total", "status"]
     },
     "customer": {
       "title": "Customer",
-      "description": "Customer profile from order",
+      "description": "Customer directory profile",
       "type": "object",
       "properties": {
-        "email": { "type": "string", "format": "email" },
-        "name": { "type": "string" }
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "totalOrders": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "lastOrderDate": { "type": "string" },
+        "orders": { "type": "array" },
+        "createdAt": { "type": "string" }
       },
-      "required": ["email", "name"]
+      "required": ["name", "phone"]
     },
-    "auditLog": {
-      "title": "AuditLog",
-      "description": "Admin activity log",
+    "siteSettings": {
+      "title": "SiteSettings",
+      "description": "Store configuration and site content",
       "type": "object",
       "properties": {
-        "action": { "type": "string" },
-        "adminId": { "type": "string" },
-        "timestamp": { "type": "string" }
+        "storeName": { "type": "string" },
+        "tagline": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "currency": { "type": "string" },
+        "deliveryFeeDhaka": { "type": "number" },
+        "deliveryFeeOutside": { "type": "number" },
+        "freeDeliveryThreshold": { "type": "number" },
+        "codEnabled": { "type": "boolean" },
+        "bkashNumber": { "type": "string" },
+        "facebookUrl": { "type": "string" },
+        "instagramUrl": { "type": "string" },
+        "whatsappNumber": { "type": "string" }
       },
-      "required": ["action", "adminId", "timestamp"]
+      "required": ["storeName"]
     }
   },
   "firestore": {
@@ -68,6 +125,10 @@
       "schema": "product",
       "description": "Product catalog"
     },
+    "/categories/{categoryId}": {
+      "schema": "category",
+      "description": "Store categories"
+    },
     "/orders/{orderId}": {
       "schema": "order",
       "description": "Customer orders"
@@ -76,9 +137,9 @@
       "schema": "customer",
       "description": "Customer profiles"
     },
-    "/auditLogs/{logId}": {
-      "schema": "auditLog",
-      "description": "Admin activity logs"
+    "/settings/{settingId}": {
+      "schema": "siteSettings",
+      "description": "Store settings and website content"
     }
   }
 }

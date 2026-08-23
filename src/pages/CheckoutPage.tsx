@@ -5,6 +5,7 @@ import { formatPrice } from '../lib/utils';
 import { ShoppingBag, CheckCircle, ShieldCheck } from 'lucide-react';
 import { createOrder, subscribeToSiteSettings, defaultSiteSettings } from '../lib/dataService';
 import { SiteSettings } from '../types';
+import { FreeDeliveryProgress } from '../components/FreeDeliveryProgress';
 
 export function CheckoutPage() {
   const { items, cartTotal, clearCart } = useCart();
@@ -200,47 +201,22 @@ export function CheckoutPage() {
                   3. PAYMENT METHOD
                 </h2>
                 <div className="space-y-3">
-                  <label
-                    onClick={() => setPaymentMethod('cod')}
-                    className={`p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                      paymentMethod === 'cod'
-                        ? 'bg-emerald-50/50 border-emerald-700 ring-1 ring-emerald-700'
-                        : 'bg-white border-black/10 hover:border-black/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-emerald-700' : 'border-gray-300'}`}>
-                        {paymentMethod === 'cod' && <div className="w-2 h-2 rounded-full bg-emerald-700"></div>}
+                  <div className="p-5 rounded-2xl border bg-emerald-50/60 border-emerald-600/30 flex items-center justify-between shadow-xs">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-5 h-5 rounded-full border-2 border-emerald-700 flex items-center justify-center bg-white">
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-700"></div>
                       </div>
                       <div>
-                        <span className="text-sm font-semibold text-gray-900">Cash on Delivery</span>
-                        <p className="text-xs text-gray-500">Pay cash upon receiving your delivery</p>
+                        <span className="text-sm font-bold text-gray-900">Cash on Delivery (COD)</span>
+                        <p className="text-xs text-gray-600 mt-0.5">
+                          {settings.codInstructions || 'Pay with cash upon delivery of your parcel at your doorstep'}
+                        </p>
                       </div>
                     </div>
-                    <span className="text-xs font-semibold text-emerald-800">Available</span>
-                  </label>
-
-                  {settings.bkashNumber && (
-                    <label
-                      onClick={() => setPaymentMethod('bkash')}
-                      className={`p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                        paymentMethod === 'bkash'
-                          ? 'bg-pink-50/50 border-pink-600 ring-1 ring-pink-600'
-                          : 'bg-white border-black/10 hover:border-black/20'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'bkash' ? 'border-pink-600' : 'border-gray-300'}`}>
-                          {paymentMethod === 'bkash' && <div className="w-2 h-2 rounded-full bg-pink-600"></div>}
-                        </div>
-                        <div>
-                          <span className="text-sm font-semibold text-gray-900">bKash Payment</span>
-                          <p className="text-xs text-gray-500">Send money to {settings.bkashNumber}</p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-semibold text-pink-600">bKash</span>
-                    </label>
-                  )}
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                      Default & Guaranteed
+                    </span>
+                  </div>
                 </div>
               </section>
 
@@ -256,10 +232,12 @@ export function CheckoutPage() {
 
           {/* Order Summary */}
           <div className="lg:w-2/5">
-            <div className="bg-[#F2F0EB] p-8 rounded-2xl sticky top-32">
-              <h2 className="text-lg font-medium tracking-wide mb-8">ORDER SUMMARY</h2>
+            <div className="bg-[#F2F0EB] p-8 rounded-2xl sticky top-32 space-y-6">
+              <h2 className="text-lg font-medium tracking-wide">ORDER SUMMARY</h2>
+
+              <FreeDeliveryProgress currentAmount={cartTotal} />
               
-              <div className="flex flex-col gap-4 mb-8 max-h-[40vh] overflow-y-auto no-scrollbar pr-2">
+              <div className="flex flex-col gap-4 max-h-[35vh] overflow-y-auto no-scrollbar pr-2 border-t border-black/10 pt-6">
                 {items.map((item) => (
                   <div key={item.product.id} className="flex gap-4">
                     <div className="w-16 h-20 bg-accent/30 rounded-xl overflow-hidden flex-shrink-0 relative">

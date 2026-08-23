@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { formatPrice } from '../lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
+import { FreeDeliveryProgress } from './FreeDeliveryProgress';
 
 export function CartDrawer() {
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -44,6 +45,13 @@ export function CartDrawer() {
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
+
+            {/* Free Delivery Bar */}
+            {items.length > 0 && (
+              <div className="px-6 pt-4 pb-0">
+                <FreeDeliveryProgress currentAmount={cartTotal} />
+              </div>
+            )}
 
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8 no-scrollbar">

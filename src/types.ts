@@ -85,8 +85,16 @@ export interface SiteContent {
   heroButtonText: string;
   heroButtonLink: string;
   heroExploreLink?: string;
-  promoBarActive: boolean;
-  promoBarText: string;
+  promoBarActive?: boolean;
+  promoBarText?: string;
+  perkDeliveryTitle?: string;
+  perkDeliverySubtitle?: string;
+  perkAuthenticTitle?: string;
+  perkAuthenticSubtitle?: string;
+  perkCodTitle?: string;
+  perkCodSubtitle?: string;
+  perkSupportTitle?: string;
+  perkSupportSubtitle?: string;
   storyHeading: string;
   storyBody: string;
   bannerImage?: string;
@@ -110,6 +118,7 @@ export interface SiteSettings {
   deliveryFeeOutside?: number;
   deliveryFeeOutsideDhaka?: number;
   freeDeliveryThreshold?: number;
+  freeDeliveryText?: string;
   codEnabled: boolean;
   codInstructions?: string;
   bkashNumber?: string;

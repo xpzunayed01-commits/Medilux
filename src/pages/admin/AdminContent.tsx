@@ -77,37 +77,119 @@ export function AdminContent() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        {/* 1. Top Announcement Bar */}
+        {/* 1. Homepage Perks & Delivery Strip */}
         <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Megaphone size={18} className="text-emerald-700" />
-              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-                Top Announcement / Promo Bar
-              </h2>
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
-              <input
-                type="checkbox"
-                checked={content.promoBarActive}
-                onChange={(e) => handleChange('promoBarActive', e.target.checked)}
-                className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
-              />
-              <span>Active on Website</span>
-            </label>
+          <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+            <Megaphone size={18} className="text-emerald-700" />
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+              Homepage Perks & Free Delivery Strip (Below Hero)
+            </h2>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-              Banner Announcement Text
-            </label>
-            <input
-              type="text"
-              value={content.promoBarText}
-              onChange={(e) => handleChange('promoBarText', e.target.value)}
-              placeholder="e.g. Free shipping across Bangladesh on orders over ৳3,000"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-            />
+          <p className="text-xs text-gray-500">
+            Customize the 4 key highlight perks shown directly underneath the main homepage hero banner.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            {/* Perk 1: Free Delivery */}
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-2">
+              <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Perk 1: Free Shipping</span>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={content.perkDeliveryTitle || ''}
+                  onChange={(e) => handleChange('perkDeliveryTitle', e.target.value)}
+                  placeholder="Free Delivery"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Subtitle / Note</label>
+                <input
+                  type="text"
+                  value={content.perkDeliverySubtitle || ''}
+                  onChange={(e) => handleChange('perkDeliverySubtitle', e.target.value)}
+                  placeholder="On orders over ৳3,000"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Perk 2: Authentic */}
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-2">
+              <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Perk 2: Authenticity</span>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={content.perkAuthenticTitle || ''}
+                  onChange={(e) => handleChange('perkAuthenticTitle', e.target.value)}
+                  placeholder="100% Authentic"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Subtitle / Note</label>
+                <input
+                  type="text"
+                  value={content.perkAuthenticSubtitle || ''}
+                  onChange={(e) => handleChange('perkAuthenticSubtitle', e.target.value)}
+                  placeholder="Direct formulation & care"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Perk 3: Cash on Delivery */}
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-2">
+              <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Perk 3: Cash On Delivery</span>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={content.perkCodTitle || ''}
+                  onChange={(e) => handleChange('perkCodTitle', e.target.value)}
+                  placeholder="Cash on Delivery"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Subtitle / Note</label>
+                <input
+                  type="text"
+                  value={content.perkCodSubtitle || ''}
+                  onChange={(e) => handleChange('perkCodSubtitle', e.target.value)}
+                  placeholder="Available nationwide"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Perk 4: Fast Dispatch */}
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-2">
+              <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Perk 4: Dispatch & Care</span>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={content.perkSupportTitle || ''}
+                  onChange={(e) => handleChange('perkSupportTitle', e.target.value)}
+                  placeholder="Fast Dispatch"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">Subtitle / Note</label>
+                <input
+                  type="text"
+                  value={content.perkSupportSubtitle || ''}
+                  onChange={(e) => handleChange('perkSupportSubtitle', e.target.value)}
+                  placeholder="Within 24-48 hours"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+            </div>
           </div>
         </div>
 

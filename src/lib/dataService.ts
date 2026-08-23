@@ -10,12 +10,37 @@ import {
   onSnapshot, 
   query, 
   orderBy, 
-  where,
   writeBatch
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import { Product, Category, Order, Customer, SiteContent, SiteSettings, OrderStatus } from '../types';
 import { products as initialProducts, categories as initialCategories } from '../data';
+
+// Local storage cache keys
+const CACHE_PRODUCTS_KEY = 'medilux_cache_products';
+const CACHE_CATEGORIES_KEY = 'medilux_cache_categories';
+const CACHE_SETTINGS_KEY = 'medilux_cache_settings';
+const CACHE_CONTENT_KEY = 'medilux_cache_content';
+const CACHE_ORDERS_KEY = 'medilux_cache_orders';
+const CACHE_CUSTOMERS_KEY = 'medilux_cache_customers';
+
+function getLocalCache<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    // Ignore JSON/storage issues
+  }
+  return fallback;
+}
+
+function setLocalCache<T>(key: string, data: T) {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    // Ignore storage quota issues
+  }
+}
 
 // Default content configuration
 export const defaultSiteContent: SiteContent = {
@@ -25,8 +50,16 @@ export const defaultSiteContent: SiteContent = {
   heroButtonText: 'SHOP NOW',
   heroButtonLink: '/shop',
   heroExploreLink: '/about',
-  promoBarActive: true,
-  promoBarText: 'Complimentary shipping across Bangladesh on orders over ৳3,000.',
+  promoBarActive: false,
+  promoBarText: '',
+  perkDeliveryTitle: 'Free Delivery',
+  perkDeliverySubtitle: 'On orders over ৳3,000',
+  perkAuthenticTitle: '100% Authentic',
+  perkAuthenticSubtitle: 'Direct formulation & care',
+  perkCodTitle: 'Cash on Delivery',
+  perkCodSubtitle: 'Available nationwide',
+  perkSupportTitle: 'Fast Dispatch',
+  perkSupportSubtitle: 'Within 24-48 hours',
   storyHeading: 'GOOD THINGS BELONG\nIN EVERYDAY LIFE.',
   storyBody: 'Medilux redefines the mundane. We believe that the objects you interact with daily should not just be functional; they should be surreal, artistic experiences that elevate your consciousness and your space.',
   bannerImage: 'https://picsum.photos/id/292/1200/400',
@@ -38,25 +71,33 @@ export const defaultSiteContent: SiteContent = {
 export const defaultSiteSettings: SiteSettings = {
   storeName: 'MEDILUX',
   tagline: 'Elevated Everyday Living & Wellness',
-  phone: '+880 1700-000000',
+  phone: '+880 1834-037142',
+  storePhone: '+880 1834-037142',
   email: 'xpeee01@gmail.com',
+  storeEmail: 'xpeee01@gmail.com',
   address: 'Gulshan 2, Dhaka 1212, Bangladesh',
-  currency: '৳',
-  deliveryFeeDhaka: 60,
-  deliveryFeeOutside: 120,
+  storeAddress: 'Gulshan 2, Dhaka 1212, Bangladesh',
+  currency: 'BDT',
+  currencySymbol: '৳',
+  deliveryFeeDhaka: 80,
+  deliveryFeeInsideDhaka: 80,
+  deliveryFeeOutside: 150,
+  deliveryFeeOutsideDhaka: 150,
   freeDeliveryThreshold: 3000,
+  freeDeliveryText: 'Free Nationwide Delivery on orders over ৳3,000',
   codEnabled: true,
-  codInstructions: 'Pay with cash upon delivery of your parcel.',
-  bkashNumber: '01700000000 (Merchant/Personal)',
-  bkashInstructions: 'Send money/payment to this number with Order ID in reference.',
+  codInstructions: 'Pay with cash upon delivery of your parcel at your doorstep.',
   facebookUrl: 'https://facebook.com/medilux',
   instagramUrl: 'https://instagram.com/medilux',
-  whatsappNumber: '+8801700000000',
+  whatsappNumber: '+8801834037142',
   youtubeUrl: 'https://youtube.com',
 };
 
-// Seed products & categories if Firestore is empty
+// Seed products & categories if Firestore is empty (runs only when authenticated admin is active)
 export async function seedInitialDataIfEmpty() {
+  if (!auth.currentUser) {
+    return;
+  }
   try {
     const productsSnap = await getDocs(collection(db, 'products'));
     if (productsSnap.empty) {
@@ -64,14 +105,15 @@ export async function seedInitialDataIfEmpty() {
       const batch = writeBatch(db);
       for (const prod of initialProducts) {
         const prodRef = doc(db, 'products', prod.id);
-        batch.set(prodRef, {
+        const data: Product = {
           ...prod,
           stock: prod.isOutOfStock ? 0 : 25,
           regularPrice: Math.round(prod.price * 1.15),
           isFeatured: prod.isBestseller || prod.isNew || false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        });
+        };
+        batch.set(prodRef, data);
       }
       await batch.commit();
     }
@@ -82,11 +124,12 @@ export async function seedInitialDataIfEmpty() {
       const batch = writeBatch(db);
       for (const cat of initialCategories) {
         const catRef = doc(db, 'categories', cat.id);
-        batch.set(catRef, {
+        const data: Category = {
           ...cat,
           isHidden: false,
           order: 1,
-        });
+        };
+        batch.set(catRef, data);
       }
       await batch.commit();
     }
@@ -105,43 +148,45 @@ export async function seedInitialDataIfEmpty() {
       await setDoc(contentRef, defaultSiteContent);
     }
   } catch (err) {
-    console.error('Error checking/seeding data in Firestore:', err);
+    console.warn('Notice checking/seeding data in Firestore:', err);
   }
 }
 
 // ---------------- PRODUCTS ----------------
 export function subscribeToProducts(callback: (products: Product[]) => void) {
+  // First emit cached or default data immediately for instant render
+  const cached = getLocalCache<Product[]>(
+    CACHE_PRODUCTS_KEY,
+    initialProducts.map((p) => ({
+      ...p,
+      stock: 25,
+      isFeatured: p.isBestseller || p.isNew || false,
+    }))
+  );
+  callback(cached);
+
   const q = query(collection(db, 'products'));
   return onSnapshot(
     q,
     (snapshot) => {
       if (snapshot.empty) {
-        // Fallback to local products if empty and trigger seed
-        callback(
-          initialProducts.map((p) => ({
-            ...p,
-            stock: 25,
-            isFeatured: p.isBestseller || p.isNew || false,
-          }))
-        );
-        seedInitialDataIfEmpty();
+        // If empty in DB, use default products
+        callback(cached);
+        if (auth.currentUser) {
+          seedInitialDataIfEmpty();
+        }
       } else {
         const items: Product[] = snapshot.docs.map((docSnap) => ({
           id: docSnap.id,
           ...(docSnap.data() as Omit<Product, 'id'>),
         }));
+        setLocalCache(CACHE_PRODUCTS_KEY, items);
         callback(items);
       }
     },
     (err) => {
-      console.warn('Products subscription fallback to local:', err);
-      callback(
-        initialProducts.map((p) => ({
-          ...p,
-          stock: 25,
-          isFeatured: p.isBestseller || p.isNew || false,
-        }))
-      );
+      console.warn('Products subscription Firestore notice:', err);
+      callback(getLocalCache<Product[]>(CACHE_PRODUCTS_KEY, cached));
     }
   );
 }
@@ -149,9 +194,9 @@ export function subscribeToProducts(callback: (products: Product[]) => void) {
 export async function saveProduct(product: Partial<Product> & { name: string; price: number; category: string }): Promise<string> {
   const prodId = product.id || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${Date.now()}`;
   const prodRef = doc(db, 'products', prodId);
-  const dataToSave = {
-    ...product,
+  const dataToSave: Product = {
     id: prodId,
+    name: product.name,
     descriptor: product.descriptor || '',
     description: product.description || '',
     price: Number(product.price) || 0,
@@ -159,25 +204,54 @@ export async function saveProduct(product: Partial<Product> & { name: string; pr
     image: product.image || 'https://picsum.photos/id/292/800/1200',
     images: product.images && product.images.length > 0 ? product.images : [product.image || 'https://picsum.photos/id/292/800/1200'],
     category: product.category,
-    stock: Number(product.stock ?? 20),
+    stock: Number(product.stock ?? 25),
     isNew: Boolean(product.isNew),
     isBestseller: Boolean(product.isBestseller),
     isFeatured: Boolean(product.isFeatured),
-    isOutOfStock: (product.stock ?? 20) <= 0,
+    isOutOfStock: Number(product.stock ?? 25) <= 0,
     ingredients: product.ingredients || '',
     howToUse: product.howToUse || '',
+    createdAt: product.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
+  // Update local cache immediately
+  const currentProds = getLocalCache<Product[]>(CACHE_PRODUCTS_KEY, []);
+  const existingIdx = currentProds.findIndex((p) => p.id === prodId);
+  let updatedList: Product[];
+  if (existingIdx >= 0) {
+    updatedList = [...currentProds];
+    updatedList[existingIdx] = dataToSave;
+  } else {
+    updatedList = [dataToSave, ...currentProds];
+  }
+  setLocalCache(CACHE_PRODUCTS_KEY, updatedList);
+
+  // Save to Firestore
   await setDoc(prodRef, dataToSave, { merge: true });
   return prodId;
 }
 
 export async function deleteProduct(productId: string) {
+  // Update local cache immediately
+  const currentProds = getLocalCache<Product[]>(CACHE_PRODUCTS_KEY, []);
+  const updatedList = currentProds.filter((p) => p.id !== productId);
+  setLocalCache(CACHE_PRODUCTS_KEY, updatedList);
+
   await deleteDoc(doc(db, 'products', productId));
 }
 
 export async function updateProductStock(productId: string, newStock: number) {
+  // Update local cache
+  const currentProds = getLocalCache<Product[]>(CACHE_PRODUCTS_KEY, []);
+  const idx = currentProds.findIndex((p) => p.id === productId);
+  if (idx >= 0) {
+    currentProds[idx].stock = Number(newStock);
+    currentProds[idx].isOutOfStock = Number(newStock) <= 0;
+    currentProds[idx].updatedAt = new Date().toISOString();
+    setLocalCache(CACHE_PRODUCTS_KEY, currentProds);
+  }
+
   const prodRef = doc(db, 'products', productId);
   await updateDoc(prodRef, {
     stock: Number(newStock),
@@ -188,49 +262,72 @@ export async function updateProductStock(productId: string, newStock: number) {
 
 // ---------------- CATEGORIES ----------------
 export function subscribeToCategories(callback: (categories: Category[]) => void) {
+  const cached = getLocalCache<Category[]>(CACHE_CATEGORIES_KEY, initialCategories);
+  callback(cached);
+
   const q = query(collection(db, 'categories'));
   return onSnapshot(
     q,
     (snapshot) => {
       if (snapshot.empty) {
-        callback(initialCategories);
-        seedInitialDataIfEmpty();
+        callback(cached);
+        if (auth.currentUser) {
+          seedInitialDataIfEmpty();
+        }
       } else {
         const items: Category[] = snapshot.docs.map((docSnap) => ({
           id: docSnap.id,
           ...(docSnap.data() as Omit<Category, 'id'>),
         }));
+        setLocalCache(CACHE_CATEGORIES_KEY, items);
         callback(items);
       }
     },
     (err) => {
-      console.warn('Categories subscription fallback to local:', err);
-      callback(initialCategories);
+      console.warn('Categories subscription notice:', err);
+      callback(getLocalCache<Category[]>(CACHE_CATEGORIES_KEY, cached));
     }
   );
 }
 
 export async function saveCategory(category: Category): Promise<string> {
   const catId = category.id || category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `cat-${Date.now()}`;
+  const dataToSave: Category = {
+    ...category,
+    id: catId,
+    isHidden: Boolean(category.isHidden),
+  };
+
+  // Update local cache
+  const currentCats = getLocalCache<Category[]>(CACHE_CATEGORIES_KEY, []);
+  const existingIdx = currentCats.findIndex((c) => c.id === catId);
+  let updatedList: Category[];
+  if (existingIdx >= 0) {
+    updatedList = [...currentCats];
+    updatedList[existingIdx] = dataToSave;
+  } else {
+    updatedList = [...currentCats, dataToSave];
+  }
+  setLocalCache(CACHE_CATEGORIES_KEY, updatedList);
+
   const catRef = doc(db, 'categories', catId);
-  await setDoc(
-    catRef,
-    {
-      ...category,
-      id: catId,
-      isHidden: Boolean(category.isHidden),
-    },
-    { merge: true }
-  );
+  await setDoc(catRef, dataToSave, { merge: true });
   return catId;
 }
 
 export async function deleteCategory(categoryId: string) {
+  const currentCats = getLocalCache<Category[]>(CACHE_CATEGORIES_KEY, []);
+  const updatedList = currentCats.filter((c) => c.id !== categoryId);
+  setLocalCache(CACHE_CATEGORIES_KEY, updatedList);
+
   await deleteDoc(doc(db, 'categories', categoryId));
 }
 
 // ---------------- ORDERS ----------------
 export function subscribeToOrders(callback: (orders: Order[]) => void) {
+  const cached = getLocalCache<Order[]>(CACHE_ORDERS_KEY, []);
+  callback(cached);
+
   const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
   return onSnapshot(
     q,
@@ -239,11 +336,11 @@ export function subscribeToOrders(callback: (orders: Order[]) => void) {
         id: docSnap.id,
         ...(docSnap.data() as Omit<Order, 'id'>),
       }));
+      setLocalCache(CACHE_ORDERS_KEY, orders);
       callback(orders);
     },
     (err) => {
-      console.error('Error subscribing to orders:', err);
-      // Try un-ordered fallback if indexing requires
+      console.warn('Fallback ordering for orders:', err);
       const fallbackQ = query(collection(db, 'orders'));
       onSnapshot(fallbackQ, (s) => {
         const orders: Order[] = s.docs
@@ -252,6 +349,7 @@ export function subscribeToOrders(callback: (orders: Order[]) => void) {
             ...(docSnap.data() as Omit<Order, 'id'>),
           }))
           .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+        setLocalCache(CACHE_ORDERS_KEY, orders);
         callback(orders);
       });
     }
@@ -262,19 +360,28 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
   const orderNumber = String(Math.floor(100000 + Math.random() * 900000));
   const newOrder: Order = {
     ...orderData,
-    id: '',
+    id: `ord_${Date.now()}`,
     orderNumber,
     status: orderData.status || 'new',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
-  const docRef = await addDoc(collection(db, 'orders'), newOrder);
-  newOrder.id = docRef.id;
+  // Update local orders cache immediately
+  const currentOrders = getLocalCache<Order[]>(CACHE_ORDERS_KEY, []);
+  setLocalCache(CACHE_ORDERS_KEY, [newOrder, ...currentOrders]);
+
+  try {
+    const docRef = await addDoc(collection(db, 'orders'), newOrder);
+    newOrder.id = docRef.id;
+  } catch (err) {
+    console.error('Error saving order to Firestore:', err);
+  }
 
   // 1. Automatically decrease stock for each ordered item
   try {
     for (const item of orderData.items) {
+      updateProductStock(item.productId, (item.quantity ? Math.max(0, 25 - item.quantity) : 20));
       const prodRef = doc(db, 'products', item.productId);
       const prodSnap = await getDoc(prodRef);
       if (prodSnap.exists()) {
@@ -309,7 +416,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
           totalOrders: (prev.totalOrders || 0) + 1,
           totalSpent: (prev.totalSpent || 0) + orderData.total,
           lastOrderDate: new Date().toISOString(),
-          orders: [...(prev.orders || []), docRef.id],
+          orders: [...(prev.orders || []), newOrder.id],
         });
       } else {
         await setDoc(customerRef, {
@@ -322,7 +429,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
           totalOrders: 1,
           totalSpent: orderData.total,
           lastOrderDate: new Date().toISOString(),
-          orders: [docRef.id],
+          orders: [newOrder.id],
           createdAt: new Date().toISOString(),
         });
       }
@@ -335,6 +442,15 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
+  // Update local cache
+  const currentOrders = getLocalCache<Order[]>(CACHE_ORDERS_KEY, []);
+  const idx = currentOrders.findIndex((o) => o.id === orderId);
+  if (idx >= 0) {
+    currentOrders[idx].status = status;
+    currentOrders[idx].updatedAt = new Date().toISOString();
+    setLocalCache(CACHE_ORDERS_KEY, currentOrders);
+  }
+
   const orderRef = doc(db, 'orders', orderId);
   await updateDoc(orderRef, {
     status,
@@ -343,11 +459,18 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
 }
 
 export async function deleteOrder(orderId: string) {
+  const currentOrders = getLocalCache<Order[]>(CACHE_ORDERS_KEY, []);
+  const updated = currentOrders.filter((o) => o.id !== orderId);
+  setLocalCache(CACHE_ORDERS_KEY, updated);
+
   await deleteDoc(doc(db, 'orders', orderId));
 }
 
 // ---------------- CUSTOMERS ----------------
 export function subscribeToCustomers(callback: (customers: Customer[]) => void) {
+  const cached = getLocalCache<Customer[]>(CACHE_CUSTOMERS_KEY, []);
+  callback(cached);
+
   const q = query(collection(db, 'customers'));
   return onSnapshot(
     q,
@@ -356,30 +479,36 @@ export function subscribeToCustomers(callback: (customers: Customer[]) => void) 
         id: docSnap.id,
         ...(docSnap.data() as Omit<Customer, 'id'>),
       }));
+      setLocalCache(CACHE_CUSTOMERS_KEY, customers);
       callback(customers);
     },
     (err) => {
       console.error('Error subscribing to customers:', err);
-      callback([]);
+      callback(getLocalCache<Customer[]>(CACHE_CUSTOMERS_KEY, []));
     }
   );
 }
 
 // ---------------- SETTINGS & CONTENT ----------------
 export function subscribeToSettings(callback: (settings: SiteSettings) => void) {
+  const cached = getLocalCache<SiteSettings>(CACHE_SETTINGS_KEY, defaultSiteSettings);
+  callback(cached);
+
   const ref = doc(db, 'settings', 'general');
   return onSnapshot(
     ref,
     (docSnap) => {
       if (docSnap.exists()) {
-        callback(docSnap.data() as SiteSettings);
+        const data = docSnap.data() as SiteSettings;
+        setLocalCache(CACHE_SETTINGS_KEY, data);
+        callback(data);
       } else {
         callback(defaultSiteSettings);
       }
     },
     (err) => {
-      console.warn('Settings subscription fallback:', err);
-      callback(defaultSiteSettings);
+      console.warn('Settings subscription notice:', err);
+      callback(getLocalCache<SiteSettings>(CACHE_SETTINGS_KEY, defaultSiteSettings));
     }
   );
 }
@@ -387,29 +516,36 @@ export function subscribeToSettings(callback: (settings: SiteSettings) => void) 
 export const subscribeToSiteSettings = subscribeToSettings;
 
 export async function saveSiteSettings(settings: SiteSettings) {
+  setLocalCache(CACHE_SETTINGS_KEY, settings);
   const ref = doc(db, 'settings', 'general');
   await setDoc(ref, settings, { merge: true });
 }
 
 export function subscribeToSiteContent(callback: (content: SiteContent) => void) {
+  const cached = getLocalCache<SiteContent>(CACHE_CONTENT_KEY, defaultSiteContent);
+  callback(cached);
+
   const ref = doc(db, 'settings', 'content');
   return onSnapshot(
     ref,
     (docSnap) => {
       if (docSnap.exists()) {
-        callback(docSnap.data() as SiteContent);
+        const data = docSnap.data() as SiteContent;
+        setLocalCache(CACHE_CONTENT_KEY, data);
+        callback(data);
       } else {
         callback(defaultSiteContent);
       }
     },
     (err) => {
-      console.warn('Site content subscription fallback:', err);
-      callback(defaultSiteContent);
+      console.warn('Site content subscription notice:', err);
+      callback(getLocalCache<SiteContent>(CACHE_CONTENT_KEY, defaultSiteContent));
     }
   );
 }
 
 export async function saveSiteContent(content: SiteContent) {
+  setLocalCache(CACHE_CONTENT_KEY, content);
   const ref = doc(db, 'settings', 'content');
   await setDoc(ref, content, { merge: true });
 }
