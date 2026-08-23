@@ -1,21 +1,41 @@
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { products, categories } from '../data';
+import { products as fallbackProducts, categories as fallbackCategories } from '../data';
 import { ProductCard } from '../components/ProductCard';
 import { AnimatedSection } from '../components/AnimatedSection';
+import { subscribeToProducts, subscribeToCategories } from '../lib/dataService';
+import { Product, Category } from '../types';
 
 export function CollectionPage() {
   const { id } = useParams();
+  const [productsList, setProductsList] = useState<Product[]>(fallbackProducts);
+  const [categoriesList, setCategoriesList] = useState<Category[]>(fallbackCategories);
+
+  useEffect(() => {
+    const unsubProds = subscribeToProducts((data) => {
+      if (data && data.length > 0) setProductsList(data);
+    });
+    const unsubCats = subscribeToCategories((data) => {
+      if (data && data.length > 0) setCategoriesList(data);
+    });
+
+    return () => {
+      unsubProds();
+      unsubCats();
+    };
+  }, []);
   
   // If id is undefined (e.g. /shop), show all products
-  const category = id ? categories.find((c) => c.id === id) : {
+  const category = id ? categoriesList.find((c) => c.id === id) : {
+    id: 'all',
     name: 'ALL PRODUCTS',
     description: 'Thoughtfully selected essentials for the way you live.',
     image: 'https://picsum.photos/id/292/2000/1200'
   };
 
   const filteredProducts = id
-    ? products.filter((p) => p.category === id)
-    : products;
+    ? productsList.filter((p) => p.category === id)
+    : productsList;
 
   if (id && !category) {
     return (
@@ -33,7 +53,8 @@ export function CollectionPage() {
       {/* Category Hero */}
       <section className="relative h-[40vh] md:h-[50vh] flex items-center justify-center px-6 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img referrerPolicy="no-referrer"
+          <img
+            referrerPolicy="no-referrer"
             src={category!.image}
             alt={category!.name}
             className="w-full h-full object-cover"

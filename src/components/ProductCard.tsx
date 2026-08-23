@@ -5,7 +5,7 @@ import { formatPrice } from '../lib/utils';
 import { useCart } from '../context/CartContext';
 import { Plus } from 'lucide-react';
 
-export function ProductCard({ product }: { product: Product }) {
+export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart } = useCart();
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
