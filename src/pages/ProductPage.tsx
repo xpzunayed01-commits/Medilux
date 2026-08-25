@@ -88,6 +88,7 @@ export function ProductPage() {
                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 fetchPriority="high"
                 loading="eager"
+                decoding="async"
               />
             </div>
 
@@ -146,44 +147,44 @@ export function ProductPage() {
             {/* Stock status indicator */}
             <div className="mb-6">
               {isOutOfStock ? (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-                  <XCircle size={14} />
+                <div className="inline-flex items-center gap-2 text-xs font-medium text-rose-600">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
                   <span>Currently Out of Stock</span>
                 </div>
               ) : stock <= 5 ? (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
-                  <AlertTriangle size={14} />
-                  <span>Only {stock} items left in stock</span>
+                <div className="inline-flex items-center gap-2 text-xs font-medium text-amber-700">
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                  <span>Low Stock — Only {stock} units left</span>
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-                  <CheckCircle size={14} />
-                  <span>In Stock • Ready for delivery</span>
+                <div className="inline-flex items-center gap-2 text-xs font-medium text-emerald-800">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                  <span>In Stock • Ready for dispatch</span>
                 </div>
               )}
             </div>
 
-            {/* Quantity and Action Buttons - Minimal & High-End */}
-            <div className="space-y-2.5 mb-8">
+            {/* Quantity and Minimalist Action Buttons */}
+            <div className="space-y-3 mb-8">
               <div className="flex items-center gap-2.5">
-                {/* Minimalist Step Counter */}
-                <div className="flex items-center border border-black/10 bg-white/80 rounded-xl h-11 px-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                {/* Minimalist Pill Stepper */}
+                <div className="flex items-center border border-black/10 bg-[#F9F8F6] rounded-full h-11 px-2">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={isOutOfStock}
-                    className="w-7 h-7 flex items-center justify-center text-primary hover:bg-black/5 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+                    className="w-7 h-7 flex items-center justify-center text-primary hover:bg-black/5 rounded-full transition-colors disabled:opacity-30 cursor-pointer"
                     aria-label="Decrease quantity"
                   >
-                    <Minus size={13} />
+                    <Minus size={12} />
                   </button>
-                  <span className="w-9 text-center font-medium text-sm text-primary">{quantity}</span>
+                  <span className="w-8 text-center font-medium text-xs text-primary">{quantity}</span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
                     disabled={isOutOfStock}
-                    className="w-7 h-7 flex items-center justify-center text-primary hover:bg-black/5 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+                    className="w-7 h-7 flex items-center justify-center text-primary hover:bg-black/5 rounded-full transition-colors disabled:opacity-30 cursor-pointer"
                     aria-label="Increase quantity"
                   >
-                    <Plus size={13} />
+                    <Plus size={12} />
                   </button>
                 </div>
 
@@ -192,9 +193,9 @@ export function ProductPage() {
                   type="button"
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
-                  className="flex-1 bg-white hover:bg-black/[0.02] active:bg-black/[0.04] text-primary border border-black/15 h-11 text-xs font-medium tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                  className="flex-1 bg-white hover:bg-[#F9F8F6] active:scale-[0.99] text-primary border border-black/15 h-11 text-xs font-semibold tracking-wider rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
                 >
-                  <ShoppingBag size={14} className="opacity-75" />
+                  <ShoppingBag size={13} className="opacity-70" />
                   <span>ADD TO CART</span>
                 </button>
               </div>
@@ -204,28 +205,24 @@ export function ProductPage() {
                 type="button"
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
-                className="w-full bg-[#1A3626] hover:bg-[#12271b] active:scale-[0.99] text-white h-12 text-xs sm:text-sm font-medium tracking-widest rounded-xl transition-all shadow-[0_4px_12px_rgba(26,54,38,0.15)] flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full bg-[#1A3626] hover:bg-[#12271b] active:scale-[0.99] text-white h-11 sm:h-12 text-xs font-semibold tracking-widest rounded-full transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <span>BUY NOW</span>
               </button>
             </div>
 
-            {/* Modern Delivery & Authenticity Perks */}
-            <div className="bg-[#F9F8F6] border border-black/5 rounded-2xl p-4 mb-8 space-y-3">
-              <div className="flex items-center gap-3 text-xs text-gray-800">
-                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
-                  <Truck size={13} />
-                </div>
+            {/* Minimalist Delivery & Trust Perks */}
+            <div className="border-y border-black/[0.06] py-3.5 mb-8 space-y-2">
+              <div className="flex items-center gap-2.5 text-xs text-gray-700">
+                <Truck size={14} className="text-emerald-800 shrink-0" />
                 <span>
-                  <strong className="font-semibold text-emerald-950">Free Nationwide Delivery</strong> on orders over {formatPrice(settings.freeDeliveryThreshold ?? 3000)}
+                  Free nationwide delivery on orders above {formatPrice(settings.freeDeliveryThreshold ?? 3000)}
                 </span>
               </div>
-              <div className="flex items-center gap-3 text-xs text-gray-800">
-                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck size={13} />
-                </div>
+              <div className="flex items-center gap-2.5 text-xs text-gray-700">
+                <ShieldCheck size={14} className="text-emerald-800 shrink-0" />
                 <span>
-                  <strong className="font-semibold text-emerald-950">Cash on Delivery</strong> available across all 64 districts
+                  Cash on delivery & secure bKash / Nagad payment options
                 </span>
               </div>
             </div>

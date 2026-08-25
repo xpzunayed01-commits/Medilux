@@ -6,10 +6,14 @@ export function About() {
       {/* Hero */}
       <section className="relative min-h-[70vh] flex items-center justify-center px-6 pt-24 pb-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img referrerPolicy="no-referrer"
-            src="https://picsum.photos/id/292/2000/1200"
+          <img 
+            referrerPolicy="no-referrer"
+            src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1600&q=80"
             alt="Minimalist lifestyle scene"
             className="w-full h-full object-cover"
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-background/50 backdrop-blur-[2px]"></div>
         </div>

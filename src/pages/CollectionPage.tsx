@@ -30,7 +30,7 @@ export function CollectionPage() {
     id: 'all',
     name: 'ALL PRODUCTS',
     description: 'Thoughtfully selected essentials for the way you live.',
-    image: 'https://picsum.photos/id/292/2000/1200'
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1600&q=80'
   };
 
   const filteredProducts = id
@@ -60,6 +60,7 @@ export function CollectionPage() {
             className="w-full h-full object-cover"
             fetchPriority="high"
             loading="eager"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]"></div>
         </div>

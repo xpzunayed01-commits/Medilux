@@ -85,7 +85,7 @@ export const defaultSiteContent: SiteContent = {
   perkSupportSubtitle: 'Within 24-48 hours',
   storyHeading: 'GOOD THINGS BELONG\nIN EVERYDAY LIFE.',
   storyBody: 'Medilux redefines the mundane. We believe that the objects you interact with daily should not just be functional; they should be surreal, artistic experiences that elevate your consciousness and your space.',
-  bannerImage: 'https://picsum.photos/id/292/1200/400',
+  bannerImage: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=80',
   bannerTitle: 'Pure Organic Nutrition & Holistic Care',
   bannerLink: '/shop',
 };
