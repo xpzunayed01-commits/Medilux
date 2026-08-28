@@ -2,20 +2,27 @@ import "dotenv/config";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import * as admin from "firebase-admin";
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getFirestore, Firestore } from "firebase-admin/firestore";
 
 // Initialize Firebase Admin (Requires FIREBASE_SERVICE_ACCOUNT_KEY env var)
-let db: admin.firestore.Firestore | null = null;
+let db: Firestore | null = null;
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    // Fallback to default database if specific databaseId is not needed, or configure it:
-    db = admin.firestore();
-    // For specific database ID, use: db = admin.firestore("ai-studio-mediluxecommerce-...");
-    // But since it's the main db in AI Studio usually, admin.firestore() might work if it's the default.
+    const app = !getApps().length
+      ? initializeApp({
+          credential: cert(serviceAccount),
+        })
+      : getApps()[0];
+    
+    // Connect to specific firestoreDatabaseId if configured or default
+    const databaseId = "ai-studio-mediluxecommerce-7b59eb56-0ddc-48ee-8383-58a99ca7daa0";
+    try {
+      db = getFirestore(app, databaseId);
+    } catch {
+      db = getFirestore(app);
+    }
   }
 } catch (e) {
   console.warn("Failed to initialize Firebase Admin:", e);
@@ -166,113 +173,138 @@ async function startServer() {
     }
   });
 
-  // API Route for Telegram Notification (Legacy/Fallback)
+  // API Route for Telegram Notification
   app.post("/api/notify-telegram", async (req, res) => {
-    // SECURITY: Get token from environment variable
-    const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "6642818516";
+    const { order, telegramBotToken, telegramChatId } = req.body;
 
-    if (!TELEGRAM_BOT_TOKEN) {
-      console.warn("TELEGRAM_BOT_TOKEN is not defined in environment variables. Skipping Telegram notification.");
-      // We return success anyway so the client order flow isn't interrupted,
-      // but we indicate the notification wasn't sent.
-      return res.status(200).json({ success: false, message: "Telegram not configured" });
+    // Get token from body or environment variable
+    const botToken = telegramBotToken || order?.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = telegramChatId || order?.telegramChatId || process.env.TELEGRAM_CHAT_ID || "6642818516";
+
+    if (!botToken) {
+      console.warn("TELEGRAM_BOT_TOKEN is not defined in env or settings. Skipping Telegram notification.");
+      return res.status(200).json({ 
+        success: false, 
+        message: "Telegram bot token is not configured yet. Add it in Admin Settings > Store & Telegram or set TELEGRAM_BOT_TOKEN env variable." 
+      });
     }
-
-    const { order } = req.body;
 
     if (!order) {
       return res.status(400).json({ error: "Order data is missing" });
     }
 
     try {
-      // Format the items
-      const orderItems = order.items.map((item: any) => 
-        `• ${item.name} × ${item.quantity}\n  Price: ৳${item.price * item.quantity}`
-      ).join('\n\n');
-
-      // Safely handle special characters in HTML parse_mode
-      const escapeHtml = (text: string) => {
-        if (!text) return "";
+      // Safely escape HTML characters
+      const escapeHtml = (text: string | number | undefined | null) => {
+        if (text === undefined || text === null) return "";
         return String(text)
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;");
       };
 
-      const formattedDate = new Date(order.createdAt).toLocaleString('en-BD', {
-        timeZone: 'Asia/Dhaka',
-        dateStyle: 'long',
-        timeStyle: 'short'
-      });
+      // Format the items
+      const orderItems = (order.items || []).map((item: any) => 
+        `• <b>${escapeHtml(item.name)}</b> × ${item.quantity}\n  ৳${item.price} each (৳${item.price * item.quantity})`
+      ).join('\n\n');
 
-      const text = `🛍️ <b>NEW ORDER RECEIVED</b>
+      const formattedDate = order.createdAt 
+        ? new Date(order.createdAt).toLocaleString('en-BD', {
+            timeZone: 'Asia/Dhaka',
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          })
+        : new Date().toLocaleString('en-BD', { timeZone: 'Asia/Dhaka' });
 
-━━━━━━━━━━━━━━━━━━
+      const text = `🛍️ <b>NEW MEDILUX ORDER RECEIVED!</b>\n\n` +
+        `🆔 <b>Order ID:</b> #${escapeHtml(order.orderNumber)}\n` +
+        `📦 <b>Status:</b> ${escapeHtml((order.status || 'new').toUpperCase())}\n` +
+        `━━━━━━━━━━━━━━━━━━\n\n` +
+        `👤 <b>CUSTOMER DETAILS</b>\n` +
+        `• <b>Name:</b> ${escapeHtml(order.customerName)}\n` +
+        `• <b>Phone:</b> ${escapeHtml(order.customerPhone)}\n` +
+        (order.customerEmail ? `• <b>Email:</b> ${escapeHtml(order.customerEmail)}\n` : '') +
+        `• <b>City:</b> ${escapeHtml(order.city || 'Dhaka')}\n` +
+        `• <b>Address:</b> ${escapeHtml(order.streetAddress)}\n` +
+        (order.notes ? `• <b>Notes:</b> ${escapeHtml(order.notes)}\n` : '') +
+        `\n━━━━━━━━━━━━━━━━━━\n\n` +
+        `🛒 <b>ITEMS ORDERED</b>\n\n` +
+        `${orderItems}\n\n` +
+        `━━━━━━━━━━━━━━━━━━\n\n` +
+        `💰 <b>PAYMENT & BILLING</b>\n` +
+        `• Subtotal: ৳${order.subtotal}\n` +
+        `• Delivery: ৳${order.deliveryFee}\n` +
+        `• <b>TOTAL: ৳${order.total}</b>\n` +
+        `• Payment: <b>${order.paymentMethod === 'cod' ? 'Cash on Delivery' : escapeHtml(order.paymentMethod?.toUpperCase())}</b>\n` +
+        `• Time: ${escapeHtml(formattedDate)}`;
 
-🆔 <b>Order ID:</b> #${escapeHtml(order.orderNumber)}
-
-👤 <b>CUSTOMER</b>
-Name: ${escapeHtml(order.customerName)}
-Phone: ${escapeHtml(order.customerPhone)}
-
-📍 <b>DELIVERY ADDRESS</b>
-Address: ${escapeHtml(order.streetAddress)}
-City: ${escapeHtml(order.city)}
-${order.postalCode ? `Postal Code: ${escapeHtml(order.postalCode)}` : ''}
-${order.notes ? `\n📝 <b>Notes:</b> ${escapeHtml(order.notes)}` : ''}
-
-━━━━━━━━━━━━━━━━━━
-
-🛒 <b>ORDER ITEMS</b>
-
-${escapeHtml(orderItems)}
-
-━━━━━━━━━━━━━━━━━━
-
-💰 <b>ORDER SUMMARY</b>
-
-Subtotal: ৳${order.subtotal}
-Delivery Fee: ৳${order.deliveryFee}
-<b>TOTAL: ৳${order.total}</b>
-
-💳 <b>Payment Method:</b>
-${order.paymentMethod === 'cod' ? 'Cash on Delivery' : escapeHtml(order.paymentMethod.toUpperCase())}
-
-📦 <b>Order Status:</b>
-${escapeHtml(order.status.charAt(0).toUpperCase() + order.status.slice(1))}
-
-🕐 <b>Order Time:</b>
-${escapeHtml(formattedDate)}
-
-━━━━━━━━━━━━━━━━━━
-
-🔗 <b>Order ID:</b> #${escapeHtml(order.orderNumber)}`;
-
-      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
+          chat_id: chatId,
           text: text,
           parse_mode: "HTML"
         })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Telegram API error:", errorData);
-        // Do not fail the request to block the client order flow. 
-        // We log the error and return status 200 with success: false.
-        return res.status(200).json({ success: false, error: "Telegram API error" });
+      const responseData: any = await response.json();
+      if (!response.ok || !responseData.ok) {
+        console.error("Telegram API Error response:", responseData);
+        return res.status(200).json({ 
+          success: false, 
+          error: responseData.description || "Telegram API rejected message" 
+        });
       }
 
+      console.log(`Telegram notification sent successfully for order #${order.orderNumber}`);
       return res.status(200).json({ success: true });
-    } catch (err) {
-      console.error("Error sending Telegram notification:", err);
-      return res.status(200).json({ success: false, error: "Internal server error" });
+    } catch (err: any) {
+      console.error("Failed to send telegram notification:", err);
+      return res.status(200).json({ success: false, error: err.message });
+    }
+  });
+
+  // API Route for Testing Telegram Bot directly from Admin Panel
+  app.post("/api/test-telegram", async (req, res) => {
+    const { botToken: customToken, chatId: customChatId } = req.body;
+    const botToken = customToken || process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = customChatId || process.env.TELEGRAM_CHAT_ID || "6642818516";
+
+    if (!botToken) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Telegram Bot Token is missing. Please provide it or configure in Admin Settings." 
+      });
+    }
+
+    try {
+      const testMessage = `🌿 <b>MEDILUX TELEGRAM BOT TEST</b>\n\n` +
+        `✅ Telegram notifications are now active and working properly!\n` +
+        `⏰ Time: ${new Date().toLocaleString('en-BD', { timeZone: 'Asia/Dhaka' })}\n` +
+        `⚡ Store: Medilux Pure Formulations`;
+
+      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: testMessage,
+          parse_mode: "HTML"
+        })
+      });
+
+      const data: any = await response.json();
+      if (!response.ok || !data.ok) {
+        return res.status(400).json({ 
+          success: false, 
+          error: data.description || "Telegram bot rejected the message" 
+        });
+      }
+
+      return res.status(200).json({ success: true, message: "Telegram test message sent successfully!" });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, error: err.message });
     }
   });
 

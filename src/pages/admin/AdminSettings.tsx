@@ -291,7 +291,95 @@ export function AdminSettings() {
           </div>
         </div>
 
-        {/* 4. Social Media Links */}
+        {/* 4. Telegram Bot & Instant Order Notifications */}
+        <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-blue-500 text-white flex items-center justify-center font-bold text-xs">
+                ✈️
+              </div>
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                Telegram Bot & Instant Order Notifications
+              </h2>
+            </div>
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
+              Live Order Alerts
+            </span>
+          </div>
+
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Receive detailed instant order notifications on your Telegram app as soon as any customer places an order on Medilux.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                Telegram Bot Token
+              </label>
+              <input
+                type="text"
+                value={settings.telegramBotToken || ''}
+                onChange={(e) => handleChange('telegramBotToken', e.target.value)}
+                placeholder="e.g. 1234567890:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <span className="text-[10px] text-gray-400 mt-1 block">
+                Create a bot via <b>@BotFather</b> on Telegram to get your token.
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                Telegram Chat ID / Group ID
+              </label>
+              <input
+                type="text"
+                value={settings.telegramChatId || ''}
+                onChange={(e) => handleChange('telegramChatId', e.target.value)}
+                placeholder="e.g. 6642818516"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <span className="text-[10px] text-gray-400 mt-1 block">
+                Find your Chat ID by messaging <b>@userinfobot</b> on Telegram.
+              </span>
+            </div>
+          </div>
+
+          {/* Test Telegram Notification Button */}
+          <div className="pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="text-xs text-gray-600">
+              Test your configuration to make sure your bot sends alerts properly:
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/test-telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      botToken: settings.telegramBotToken,
+                      chatId: settings.telegramChatId,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    alert('✅ Telegram bot test message sent successfully! Check your Telegram app.');
+                  } else {
+                    alert('❌ Telegram test failed: ' + (data.error || 'Check Bot Token & Chat ID'));
+                  }
+                } catch (err: any) {
+                  alert('❌ Error: ' + err.message);
+                }
+              }}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Test Telegram Bot</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 5. Social Media Links */}
         <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-xs space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
             <Share2 size={18} className="text-emerald-700" />

@@ -519,14 +519,19 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
     console.error('Error updating customer record:', custErr);
   }
 
-  // 3. Send Telegram Notification (Secondary)
+  // 3. Send Telegram Notification (Seamless & Dynamic)
   try {
+    const savedSettings = getLocalCache<SiteSettings>(CACHE_SETTINGS_KEY, defaultSiteSettings);
     fetch('/api/notify-telegram', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ order: newOrder }),
+      body: JSON.stringify({ 
+        order: newOrder,
+        telegramBotToken: savedSettings.telegramBotToken,
+        telegramChatId: savedSettings.telegramChatId
+      }),
     })
     .then(res => res.json())
     .then(async (data) => {
@@ -547,6 +552,41 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
   }
 
   return newOrder;
+}
+
+export async function resendTelegramNotification(order: Order, customBotToken?: string, customChatId?: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    const savedSettings = getLocalCache<SiteSettings>(CACHE_SETTINGS_KEY, defaultSiteSettings);
+    const botToken = customBotToken || savedSettings.telegramBotToken;
+    const chatId = customChatId || savedSettings.telegramChatId;
+
+    const res = await fetch('/api/notify-telegram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        order,
+        telegramBotToken: botToken,
+        telegramChatId: chatId,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      if (order.id) {
+        try {
+          const orderRef = doc(db, 'orders', order.id);
+          await updateDoc(orderRef, { telegramNotificationSent: true });
+        } catch (e) {
+          // ignore
+        }
+      }
+      return { success: true, message: 'Telegram alert sent successfully!' };
+    } else {
+      return { success: false, message: data.error || data.message || 'Telegram notification could not be sent' };
+    }
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Network error sending Telegram notification' };
+  }
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {

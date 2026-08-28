@@ -16,7 +16,9 @@ import {
   Flame, 
   HeartHandshake, 
   Shield, 
-  ShoppingBag 
+  ShoppingBag,
+  Check,
+  Plus
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { AnimatedSection } from '../components/AnimatedSection';
@@ -41,8 +43,9 @@ export function Home() {
   
   // Interactive product filter tab
   const [activeTab, setActiveTab] = useState<string>('all');
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
   const [spotlightAdded, setSpotlightAdded] = useState(false);
+  const [spotlightQty, setSpotlightQty] = useState(1);
 
   // Carousel ref & manual scroll
   const categoryScrollRef = useRef<HTMLDivElement>(null);
@@ -86,14 +89,14 @@ export function Home() {
 
   const scrollCategories = (direction: 'left' | 'right') => {
     if (categoryScrollRef.current) {
-      const scrollAmount = direction === 'left' ? -320 : 320;
+      const scrollAmount = direction === 'left' ? -340 : 340;
       categoryScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
   const handleSpotlightAddToCart = () => {
     if (spotlightProduct) {
-      addToCart(spotlightProduct, 1);
+      addToCart(spotlightProduct, spotlightQty);
       setSpotlightAdded(true);
       setTimeout(() => setSpotlightAdded(false), 2000);
     }
@@ -103,8 +106,8 @@ export function Home() {
   const testimonials = [
     {
       name: "Sabrina Rahman",
-      location: "Gulshan, Dhaka",
-      review: "The Reishi Gano powder transformed my morning routine. Pure quality, completely authentic, and fast delivery within 24 hours.",
+      location: "Gulshan 2, Dhaka",
+      review: "The Reishi Gano powder transformed my daily morning routine. Pure quality, completely authentic, and fast delivery within 24 hours.",
       rating: 5,
       product: "Reishi Gano Powder"
     },
@@ -118,50 +121,52 @@ export function Home() {
     {
       name: "Farhana Chowdhury",
       location: "Dhanmondi, Dhaka",
-      review: "The Hydrating Face Serum is genuinely lightweight and deeply hydrating. Cash on delivery was seamless. Highly recommended!",
+      review: "The Hydrating Face Serum is genuinely lightweight and deeply nourishing. Cash on delivery was seamless. Highly recommended!",
       rating: 5,
       product: "Hydrating Face Serum"
     }
   ];
 
   return (
-    <div className="w-full bg-[#FAF9F5] text-[#181816] selection:bg-[#14281D] selection:text-white pt-10 sm:pt-14">
+    <div className="w-full bg-[#FAF9F5] text-[#181816] selection:bg-[#14281D] selection:text-white pt-8 sm:pt-12">
       
-      {/* 1. HERO SECTION - Editorial Luxury Atmosphere */}
-      <section className="relative w-full min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      {/* 1. HERO SECTION - Minimal Editorial Atmosphere */}
+      <section className="relative w-full min-h-[82vh] lg:min-h-[88vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        
         {/* Subtle Ambient Radial Lighting */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-[50vw] max-w-4xl rounded-full bg-gradient-to-b from-[#E6E1D6]/70 via-[#FAF9F5]/40 to-transparent blur-3xl pointer-events-none -z-10"></div>
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75vw] h-[55vw] max-w-5xl rounded-full bg-gradient-to-b from-[#EAE5D9]/80 via-[#FAF9F5]/50 to-transparent blur-3xl pointer-events-none -z-10"></div>
 
         {content.heroImage && (
           <div className="absolute inset-0 -z-10 overflow-hidden">
             <img 
+              referrerPolicy="no-referrer"
               src={content.heroImage} 
-              alt="Medilux Hero" 
+              alt="Medilux Botanical Heritage" 
               className="w-full h-full object-cover opacity-15 mix-blend-multiply filter contrast-125" 
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#FAF9F5]/70 via-[#FAF9F5]/90 to-[#FAF9F5]"></div>
           </div>
         )}
 
-        <div className="max-w-5xl mx-auto text-center flex flex-col items-center relative z-10">
+        <div className="max-w-4xl mx-auto text-center flex flex-col items-center relative z-10">
           
           {/* Top Pill Badge */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#14281D]/[0.06] border border-[#14281D]/10 text-[#14281D] text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-6 sm:mb-8"
+            transition={{ duration: 0.7 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#14281D]/[0.06] border border-[#14281D]/10 text-[#14281D] text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-6 sm:mb-8 shadow-xs"
           >
             <Sparkles size={12} className="text-[#C5A880]" />
-            <span>Pure Botanical & Everyday Essentials</span>
+            <span>Pure Botanicals & Everyday Rituals</span>
           </motion.div>
 
           {/* Luxury Main Title */}
           <motion.h1
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-light tracking-tight leading-[1.08] text-[#14281D] max-w-4xl"
+            transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-[4.75rem] font-light tracking-tight leading-[1.1] text-[#14281D] max-w-3xl"
           >
             {content.heroHeading || "Elevate your everyday ritual."}
           </motion.h1>
@@ -170,22 +175,22 @@ export function Home() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 sm:mt-8 text-sm sm:text-base md:text-lg text-[#6B6862] font-normal max-w-2xl mx-auto leading-relaxed"
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-6 sm:mt-8 text-sm sm:text-base md:text-lg text-[#66635C] font-normal max-w-2xl mx-auto leading-relaxed"
           >
-            {content.heroSubheading || "Discover our thoughtfully curated collection of pure formulations and wellness lifestyle essentials, crafted for mindful living."}
+            {content.heroSubheading || "Thoughtfully curated formulations and certified wellness essentials, designed for holistic balance and pure vitality."}
           </motion.p>
 
           {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto"
+            transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-9 sm:mt-11 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto"
           >
             <Link 
               to="/shop" 
-              className="w-full sm:w-auto px-8 py-4 bg-[#14281D] text-white text-xs tracking-[0.2em] uppercase font-semibold rounded-full hover:bg-[#0d1b13] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 bg-[#14281D] text-white text-xs tracking-[0.2em] uppercase font-semibold rounded-full hover:bg-[#0b160f] hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
             >
               <span>{content.heroButtonText || "SHOP THE COLLECTION"}</span>
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -193,18 +198,18 @@ export function Home() {
 
             <Link 
               to="/about" 
-              className="w-full sm:w-auto px-8 py-4 bg-white text-[#14281D] border border-[#14281D]/15 text-xs tracking-[0.2em] uppercase font-semibold rounded-full hover:bg-[#FAF9F5] transition-all duration-300 flex items-center justify-center cursor-pointer shadow-xs"
+              className="w-full sm:w-auto px-8 py-4 bg-white text-[#14281D] border border-[#14281D]/15 text-xs tracking-[0.2em] uppercase font-semibold rounded-full hover:bg-[#F2EFE9] transition-all duration-300 flex items-center justify-center cursor-pointer shadow-xs"
             >
               OUR STORY
             </Link>
           </motion.div>
 
-          {/* Live Trust Metrics Ribbon */}
+          {/* Trust Value Ribbon */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.4 }}
-            className="mt-16 sm:mt-20 pt-8 border-t border-black/[0.06] w-full grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-left"
+            transition={{ duration: 1.1, delay: 0.4 }}
+            className="mt-14 sm:mt-18 pt-8 border-t border-black/[0.06] w-full grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-left"
           >
             <div className="flex items-center gap-3 p-2">
               <div className="w-9 h-9 rounded-full bg-white shadow-xs border border-black/[0.04] flex items-center justify-center text-[#14281D] shrink-0">
@@ -212,7 +217,7 @@ export function Home() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-[#14281D]">Free Delivery</p>
-                <p className="text-[11px] text-[#6B6862]">Orders over ৳{settings.freeDeliveryThreshold || 2000}</p>
+                <p className="text-[11px] text-[#66635C]">Orders over ৳{settings.freeDeliveryThreshold || 3000}</p>
               </div>
             </div>
 
@@ -222,7 +227,7 @@ export function Home() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-[#14281D]">100% Genuine</p>
-                <p className="text-[11px] text-[#6B6862]">Direct from certified sources</p>
+                <p className="text-[11px] text-[#66635C]">Certified pure origin</p>
               </div>
             </div>
 
@@ -232,7 +237,7 @@ export function Home() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-[#14281D]">Cash on Delivery</p>
-                <p className="text-[11px] text-[#6B6862]">Pay at your doorstep</p>
+                <p className="text-[11px] text-[#66635C]">Pay at your doorstep</p>
               </div>
             </div>
 
@@ -242,7 +247,7 @@ export function Home() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-[#14281D]">Fast Dispatch</p>
-                <p className="text-[11px] text-[#6B6862]">24-48h Dhaka delivery</p>
+                <p className="text-[11px] text-[#66635C]">24-48h Dhaka delivery</p>
               </div>
             </div>
           </motion.div>
@@ -252,11 +257,11 @@ export function Home() {
 
       {/* 2. CURATED COLLECTIONS CAROUSEL */}
       {displayCategories.length > 0 && (
-        <AnimatedSection className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-black/[0.04] bg-white">
+        <AnimatedSection className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 border-t border-black/[0.04] bg-white">
           <div className="max-w-7xl mx-auto">
             
             {/* Section Header */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">
               <div>
                 <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#7D8E79] block mb-2">
                   CURATED EDITS
@@ -270,7 +275,7 @@ export function Home() {
               <div className="flex items-center gap-3">
                 <Link 
                   to="/shop" 
-                  className="text-xs font-semibold tracking-wider text-[#14281D] hover:text-[#7D8E79] transition-colors flex items-center gap-1 mr-2"
+                  className="text-xs font-semibold tracking-wider text-[#14281D] hover:text-[#7D8E79] transition-colors flex items-center gap-1 mr-2 cursor-pointer"
                 >
                   <span>VIEW ALL</span>
                   <ArrowRight size={12} />
@@ -302,10 +307,11 @@ export function Home() {
                 <Link
                   key={category.id}
                   to={`/collections/${category.id}`}
-                  className="group relative flex-shrink-0 w-[240px] sm:w-[280px] md:w-[320px] rounded-2xl overflow-hidden bg-[#FAF9F5] border border-black/[0.04] shadow-xs hover:shadow-md transition-all duration-500"
+                  className="group relative flex-shrink-0 w-[240px] sm:w-[280px] md:w-[320px] rounded-2xl overflow-hidden bg-[#FAF9F5] border border-black/[0.04] shadow-xs hover:shadow-lg transition-all duration-500 cursor-pointer"
                 >
                   <div className="aspect-[4/5] overflow-hidden bg-[#E6E1D6]/40 relative">
                     <img 
+                      referrerPolicy="no-referrer"
                       src={category.image} 
                       alt={category.name} 
                       loading="lazy"
@@ -337,47 +343,48 @@ export function Home() {
 
       {/* 3. SIGNATURE PRODUCT SPOTLIGHT SECTION */}
       {spotlightProduct && (
-        <AnimatedSection className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF9F5]">
+        <AnimatedSection className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF9F5]">
           <div className="max-w-7xl mx-auto bg-white rounded-3xl p-6 sm:p-10 lg:p-14 border border-black/[0.05] shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
               
-              {/* Product Visual Container */}
+              {/* Product Visual */}
               <div className="lg:col-span-5 relative">
                 <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-[#FAF9F5] border border-black/[0.04] shadow-sm relative group">
                   <img 
+                    referrerPolicy="no-referrer"
                     src={spotlightProduct.image} 
                     alt={spotlightProduct.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-[#14281D] text-[#E6E1D6] text-[10px] font-bold tracking-widest rounded-full uppercase flex items-center gap-1.5 shadow-md">
+                    <span className="px-3 py-1 bg-[#14281D] text-[#FAF9F5] text-[10px] font-bold tracking-widest rounded-full uppercase flex items-center gap-1.5 shadow-md">
                       <Sparkles size={11} className="text-[#C5A880]" />
-                      FLAGSHIP ESSENTIAL
+                      FLAGSHIP FORMULATION
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Product Info & Highlights */}
+              {/* Product Info & Action */}
               <div className="lg:col-span-7 flex flex-col justify-center">
                 <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#7D8E79] mb-2">
                   SIGNATURE SPOTLIGHT
                 </span>
-                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-light tracking-tight text-[#14281D] mb-4">
+                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-light tracking-tight text-[#14281D] mb-3">
                   {spotlightProduct.name}
                 </h2>
                 
                 {spotlightProduct.descriptor && (
-                  <p className="text-sm font-medium text-[#7D8E79] uppercase tracking-wider mb-4">
+                  <p className="text-xs sm:text-sm font-medium text-[#7D8E79] uppercase tracking-wider mb-4">
                     {spotlightProduct.descriptor}
                   </p>
                 )}
 
-                <p className="text-sm sm:text-base text-[#6B6862] font-normal leading-relaxed mb-6">
+                <p className="text-sm sm:text-base text-[#66635C] font-normal leading-relaxed mb-6">
                   {spotlightProduct.description}
                 </p>
 
-                {/* Key Benefits Triad */}
+                {/* Key Benefits */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 py-4 border-y border-black/[0.06]">
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-[#14281D]/[0.05] flex items-center justify-center text-[#14281D]">
@@ -401,10 +408,10 @@ export function Home() {
                   </div>
                 </div>
 
-                {/* Price & Immediate Action */}
+                {/* Price & Action */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                   <div className="flex flex-col">
-                    <span className="text-xs text-[#6B6862]">Standard Ritual Pack</span>
+                    <span className="text-xs text-[#66635C]">Standard Ritual Pack</span>
                     <span className="text-2xl sm:text-3xl font-bold text-[#14281D]">
                       {formatPrice(spotlightProduct.price)}
                     </span>
@@ -413,7 +420,7 @@ export function Home() {
                   <div className="flex-1 flex items-center gap-2">
                     <Link
                       to={`/product/${spotlightProduct.id}`}
-                      className="flex-1 py-3.5 px-6 bg-[#14281D] hover:bg-[#0d1b13] text-white text-xs font-semibold tracking-[0.16em] uppercase rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm text-center cursor-pointer"
+                      className="flex-1 py-3.5 px-6 bg-[#14281D] hover:bg-black text-white text-xs font-semibold tracking-[0.16em] uppercase rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm text-center cursor-pointer"
                     >
                       <span>VIEW FULL DETAILS</span>
                       <ArrowRight size={13} />
@@ -450,28 +457,28 @@ export function Home() {
       )}
 
       {/* 4. INTERACTIVE PRODUCT CATALOG (TABBED FILTERING) */}
-      <AnimatedSection className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white border-t border-black/[0.04]">
+      <AnimatedSection className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-black/[0.04]">
         <div className="max-w-7xl mx-auto">
           
-          <div className="flex flex-col items-center text-center mb-10 sm:mb-14">
+          <div className="flex flex-col items-center text-center mb-10 sm:mb-12">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#7D8E79] block mb-2">
               DISCOVER OUR CATALOG
             </span>
             <h2 className="text-3xl sm:text-5xl font-light tracking-tight text-[#14281D]">
               The Full Medilux Lineup
             </h2>
-            <p className="text-xs sm:text-sm text-[#6B6862] font-normal mt-2 max-w-md">
+            <p className="text-xs sm:text-sm text-[#66635C] font-normal mt-2 max-w-md">
               Meticulously crafted formulas and pure essentials for your daily balance.
             </p>
 
-            {/* Interactive Filter Pills */}
+            {/* Filter Pills */}
             <div className="flex flex-wrap items-center justify-center gap-2 mt-8 p-1.5 bg-[#FAF9F5] rounded-full border border-black/[0.05] max-w-2xl">
               <button
                 onClick={() => setActiveTab('all')}
                 className={`px-4 sm:px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300 cursor-pointer ${
                   activeTab === 'all'
                     ? 'bg-[#14281D] text-white shadow-xs'
-                    : 'text-[#6B6862] hover:text-[#14281D]'
+                    : 'text-[#66635C] hover:text-[#14281D]'
                 }`}
               >
                 ALL ESSENTIALS
@@ -482,7 +489,7 @@ export function Home() {
                 className={`px-4 sm:px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300 cursor-pointer ${
                   activeTab === 'bestsellers'
                     ? 'bg-[#14281D] text-white shadow-xs'
-                    : 'text-[#6B6862] hover:text-[#14281D]'
+                    : 'text-[#66635C] hover:text-[#14281D]'
                 }`}
               >
                 BESTSELLERS
@@ -495,7 +502,7 @@ export function Home() {
                   className={`px-4 sm:px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300 cursor-pointer uppercase ${
                     activeTab === cat.id
                       ? 'bg-[#14281D] text-white shadow-xs'
-                      : 'text-[#6B6862] hover:text-[#14281D]'
+                      : 'text-[#66635C] hover:text-[#14281D]'
                   }`}
                 >
                   {cat.name}
@@ -526,8 +533,8 @@ export function Home() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Bottom Button */}
-          <div className="mt-14 sm:mt-18 text-center">
+          {/* Bottom Link */}
+          <div className="mt-12 sm:mt-16 text-center">
             <Link 
               to="/shop" 
               className="inline-flex items-center gap-2 px-8 py-4 border border-black/15 text-[#14281D] hover:bg-[#14281D] hover:text-white text-xs tracking-[0.2em] uppercase font-semibold rounded-full transition-all duration-300 cursor-pointer"
@@ -540,11 +547,11 @@ export function Home() {
         </div>
       </AnimatedSection>
 
-      {/* 5. LUXURY VALUES & CRAFTSMANSHIP BENTO GRID */}
-      <AnimatedSection className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF9F5]">
+      {/* 5. CRAFTSMANSHIP BENTO GRID */}
+      <AnimatedSection className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF9F5]">
         <div className="max-w-7xl mx-auto">
           
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#7D8E79] block mb-2">
               THE MEDILUX PROMISE
             </span>
@@ -562,7 +569,7 @@ export function Home() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-[#14281D] mb-2">Clean, Active Botanicals</h3>
-                <p className="text-xs sm:text-sm text-[#6B6862] font-light leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#66635C] font-light leading-relaxed">
                   We formulate exclusively with pure, laboratory-verified extracts free from artificial fillers, toxic binders, and harsh synthetic chemicals.
                 </p>
               </div>
@@ -575,7 +582,7 @@ export function Home() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-[#14281D] mb-2">Mindfully Sourced & Fresh</h3>
-                <p className="text-xs sm:text-sm text-[#6B6862] font-light leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#66635C] font-light leading-relaxed">
                   Imported in controlled micro-batches to guarantee freshness, maximum bio-availability, and unmatched potency upon arrival.
                 </p>
               </div>
@@ -588,7 +595,7 @@ export function Home() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-[#14281D] mb-2">Guaranteed Authenticity</h3>
-                <p className="text-xs sm:text-sm text-[#6B6862] font-light leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#66635C] font-light leading-relaxed">
                   Every product shipped across Bangladesh comes sealed with our quality stamp and unconditional guarantee of authenticity.
                 </p>
               </div>
@@ -599,11 +606,11 @@ export function Home() {
         </div>
       </AnimatedSection>
 
-      {/* 6. VERIFIED REVIEWS & SOCIAL PROOF */}
-      <AnimatedSection className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white border-t border-black/[0.04]">
+      {/* 6. VERIFIED REVIEWS */}
+      <AnimatedSection className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-black/[0.04]">
         <div className="max-w-7xl mx-auto">
           
-          <div className="flex flex-col items-center text-center mb-12 sm:mb-16">
+          <div className="flex flex-col items-center text-center mb-10 sm:mb-14">
             <div className="flex items-center gap-1 text-[#C5A880] mb-3">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} size={16} fill="currentColor" />
@@ -612,7 +619,7 @@ export function Home() {
             <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-[#14281D]">
               Loved by 5,000+ Wellness Enthusiasts
             </h2>
-            <p className="text-xs sm:text-sm text-[#6B6862] font-light mt-2">
+            <p className="text-xs sm:text-sm text-[#66635C] font-light mt-2">
               Real experiences from our customers across Dhaka and nationwide.
             </p>
           </div>
@@ -637,7 +644,7 @@ export function Home() {
                 <div className="pt-4 border-t border-black/[0.06] flex items-center justify-between">
                   <div>
                     <h4 className="text-xs font-semibold text-[#14281D]">{item.name}</h4>
-                    <p className="text-[11px] text-[#6B6862]">{item.location}</p>
+                    <p className="text-[11px] text-[#66635C]">{item.location}</p>
                   </div>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
                     Verified Buyer
@@ -650,9 +657,8 @@ export function Home() {
         </div>
       </AnimatedSection>
 
-      {/* 7. BRAND MANIFESTO (Deep Forest Green Luxury Block) */}
-      <AnimatedSection className="py-24 sm:py-32 px-6 bg-[#14281D] text-[#FAF9F5] text-center relative overflow-hidden">
-        {/* Subtle decorative glow */}
+      {/* 7. BRAND MANIFESTO */}
+      <AnimatedSection className="py-20 sm:py-28 px-6 bg-[#14281D] text-[#FAF9F5] text-center relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[40vw] bg-[#7D8E79]/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-3xl mx-auto relative z-10">

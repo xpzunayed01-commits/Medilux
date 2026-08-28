@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { subscribeToSiteSettings, subscribeToCategories, defaultSiteSettings } from '../lib/dataService';
 import { SiteSettings, Category } from '../types';

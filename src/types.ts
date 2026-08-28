@@ -128,4 +128,6 @@ export interface SiteSettings {
   instagramUrl?: string;
   whatsappNumber?: string;
   youtubeUrl?: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
 }
