@@ -21,16 +21,13 @@ export function AdminLogin() {
       navigate('/xpzunayed/dashboard');
     } catch (error: any) {
       console.error('Google Sign-in notice:', error);
-      // Fallback directly to dashboard so admin is not blocked
-      navigate('/xpzunayed/dashboard');
+      setErrorMessage('Sign-in failed. Are you sure you have admin rights?');
     } finally {
       setGoogleLoading(false);
     }
   };
 
-  const handleDirectAccess = () => {
-    navigate('/xpzunayed/dashboard');
-  };
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +44,7 @@ export function AdminLogin() {
       navigate('/xpzunayed/dashboard');
     } catch (error: any) {
       console.warn('Login attempt:', error);
-      // If email auth provider is not configured or fails, allow direct access so the admin can manage the store
-      navigate('/xpzunayed/dashboard');
+      setErrorMessage('Invalid credentials or you do not have admin rights.');
     } finally {
       setLoading(false);
     }
@@ -158,14 +154,7 @@ export function AdminLogin() {
               <ArrowRight size={15} />
             </button>
 
-            <button
-              type="button"
-              onClick={handleDirectAccess}
-              className="px-4 py-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-xl font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5"
-            >
-              <Sparkles size={14} className="text-emerald-700" />
-              <span>Direct Enter</span>
-            </button>
+            
           </div>
         </form>
 

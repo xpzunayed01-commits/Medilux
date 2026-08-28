@@ -1,6 +1,6 @@
 import { useCart } from '../context/CartContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, ArrowRight, Trash2 } from 'lucide-react';
 import { formatPrice } from '../lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
 import { FreeDeliveryProgress } from './FreeDeliveryProgress';
@@ -24,7 +24,7 @@ export function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsCartOpen(false)}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50"
           />
 
           {/* Drawer */}
@@ -32,82 +32,103 @@ export function CartDrawer() {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-            className="fixed inset-y-0 right-0 w-full max-w-md bg-surface shadow-2xl z-50 flex flex-col"
+            transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+            className="fixed inset-y-0 right-0 w-full max-w-md bg-[#FAF9F5] shadow-2xl z-50 flex flex-col justify-between"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-black/5">
-              <h2 className="text-lg font-medium tracking-wide">YOUR CART</h2>
-              <button
-                onClick={() => setIsCartOpen(false)}
-                className="p-2 -mr-2 text-text-muted hover:text-primary transition-colors"
-              >
-                <X size={20} strokeWidth={1.5} />
-              </button>
+            <div>
+              <div className="flex items-center justify-between p-5 sm:p-6 border-b border-black/[0.06] bg-white">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag size={18} className="text-[#14281D]" />
+                  <h2 className="text-sm font-bold tracking-[0.16em] uppercase text-[#14281D]">
+                    YOUR SHOPPING BAG ({items.reduce((acc, item) => acc + item.quantity, 0)})
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setIsCartOpen(false)}
+                  className="p-1.5 -mr-1 text-[#6B6862] hover:text-[#14281D] hover:bg-black/5 rounded-full transition-colors cursor-pointer"
+                  aria-label="Close Bag"
+                >
+                  <X size={18} strokeWidth={2} />
+                </button>
+              </div>
+
+              {/* Free Delivery Bar */}
+              {items.length > 0 && (
+                <div className="p-4 bg-white border-b border-black/[0.04]">
+                  <FreeDeliveryProgress currentAmount={cartTotal} />
+                </div>
+              )}
             </div>
 
-            {/* Free Delivery Bar */}
-            {items.length > 0 && (
-              <div className="px-6 pt-4 pb-0">
-                <FreeDeliveryProgress currentAmount={cartTotal} />
-              </div>
-            )}
-
-            {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8 no-scrollbar">
+            {/* Cart Items List */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 no-scrollbar">
               {items.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 text-text-muted">
-                  <ShoppingBag size={32} strokeWidth={1} className="opacity-50" />
-                  <p className="text-sm">Looks like you haven't added anything yet.</p>
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#6B6862]">
+                  <div className="w-16 h-16 rounded-full bg-[#14281D]/[0.04] flex items-center justify-center text-[#14281D] mb-4">
+                    <ShoppingBag size={28} strokeWidth={1.5} className="opacity-70" />
+                  </div>
+                  <h3 className="text-base font-semibold text-[#14281D] mb-1">Your bag is currently empty</h3>
+                  <p className="text-xs text-[#6B6862] font-light max-w-xs mb-6">
+                    Explore our curated daily essentials to add wellness to your everyday ritual.
+                  </p>
                   <button
-                    onClick={() => setIsCartOpen(false)}
-                    className="mt-4 text-sm font-medium text-primary underline underline-offset-4"
+                    onClick={() => {
+                      setIsCartOpen(false);
+                      navigate('/shop');
+                    }}
+                    className="px-6 py-3 bg-[#14281D] text-white text-xs font-semibold tracking-[0.16em] uppercase rounded-full hover:bg-black transition-colors cursor-pointer shadow-xs"
                   >
-                    EXPLORE PRODUCTS
+                    EXPLORE ESSENTIALS
                   </button>
                 </div>
               ) : (
                 items.map((item) => (
-                  <div key={item.product.id} className="flex gap-4">
-                    <div className="w-24 h-24 bg-accent/30 rounded overflow-hidden flex-shrink-0">
-                      <img referrerPolicy="no-referrer"
+                  <div key={item.product.id} className="flex gap-4 p-3 bg-white rounded-2xl border border-black/[0.04] shadow-xs">
+                    <div className="w-20 h-20 bg-[#FAF9F5] rounded-xl overflow-hidden flex-shrink-0 border border-black/[0.03]">
+                      <img 
+                        referrerPolicy="no-referrer"
                         src={item.product.image}
                         alt={item.product.name}
-                        className="w-full h-full object-cover mix-blend-multiply"
+                        className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="flex flex-col justify-between flex-1">
+                    <div className="flex flex-col justify-between flex-1 min-w-0">
                       <div>
                         <div className="flex justify-between items-start gap-2">
-                          <h3 className="text-sm font-medium">{item.product.name}</h3>
+                          <h3 className="text-xs sm:text-sm font-semibold text-[#14281D] truncate">{item.product.name}</h3>
                           <button
                             onClick={() => removeFromCart(item.product.id)}
-                            className="text-text-muted hover:text-primary text-xs underline"
+                            className="text-gray-400 hover:text-rose-600 transition-colors p-1 cursor-pointer"
+                            title="Remove item"
                           >
-                            Remove
+                            <Trash2 size={13} />
                           </button>
                         </div>
-                        <p className="text-xs text-text-muted mt-1">{item.product.descriptor}</p>
+                        {item.product.descriptor && (
+                          <p className="text-[10px] text-[#7D8E79] uppercase tracking-wider truncate">{item.product.descriptor}</p>
+                        )}
                       </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center border border-black/10 rounded">
+
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-black/[0.03]">
+                        <div className="flex items-center border border-black/10 rounded-lg bg-[#FAF9F5] h-7 px-1">
                           <button
                             onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            className="p-1.5 text-text-muted hover:text-primary"
+                            className="w-5 h-5 flex items-center justify-center text-[#14281D] hover:bg-black/5 rounded transition-colors cursor-pointer"
                           >
-                            <Minus size={14} />
+                            <Minus size={11} />
                           </button>
-                          <span className="w-8 text-center text-sm font-medium">
+                          <span className="w-6 text-center text-xs font-bold text-[#14281D] tabular-nums">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            className="p-1.5 text-text-muted hover:text-primary"
+                            className="w-5 h-5 flex items-center justify-center text-[#14281D] hover:bg-black/5 rounded transition-colors cursor-pointer"
                           >
-                            <Plus size={14} />
+                            <Plus size={11} />
                           </button>
                         </div>
-                        <span className="text-sm font-medium">
+                        <span className="text-xs sm:text-sm font-bold text-[#14281D]">
                           {formatPrice(item.product.price * item.quantity)}
                         </span>
                       </div>
@@ -117,29 +138,35 @@ export function CartDrawer() {
               )}
             </div>
 
-            {/* Footer */}
+            {/* Footer Summary & Checkout */}
             {items.length > 0 && (
-              <div className="p-6 bg-background border-t border-black/5 flex flex-col gap-4">
-                <div className="flex items-center justify-between text-sm font-medium">
-                  <span>Subtotal</span>
-                  <span>{formatPrice(cartTotal)}</span>
+              <div className="p-5 sm:p-6 bg-white border-t border-black/[0.06] shadow-lg flex flex-col gap-4">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs text-[#6B6862]">
+                    <span>Bag Subtotal</span>
+                    <span className="font-semibold text-[#14281D] text-sm">{formatPrice(cartTotal)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-emerald-800">
+                    <span>Shipping</span>
+                    <span>{cartTotal >= 2000 ? 'Complimentary' : 'Calculated at checkout'}</span>
+                  </div>
                 </div>
-                <p className="text-xs text-text-muted">
-                  Shipping & taxes calculated at checkout.
-                </p>
-                <div className="flex flex-col gap-3">
+
+                <div className="flex flex-col gap-2 pt-2">
                   <button
                     onClick={handleCheckout}
-                    className="w-full bg-primary text-white py-4 text-xs tracking-widest font-medium rounded hover:opacity-90 transition-opacity"
+                    className="w-full bg-[#14281D] hover:bg-[#0d1b13] active:scale-[0.99] text-white py-4 text-xs tracking-[0.2em] font-semibold uppercase rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    CHECKOUT
+                    <span>CHECKOUT NOW • {formatPrice(cartTotal)}</span>
+                    <ArrowRight size={14} />
                   </button>
+
                   <Link
                     to="/cart"
                     onClick={() => setIsCartOpen(false)}
-                    className="w-full text-center py-4 text-xs tracking-widest font-medium border border-primary/20 rounded hover:bg-black/5 transition-colors"
+                    className="w-full text-center py-2.5 text-[11px] tracking-wider font-semibold text-[#6B6862] hover:text-[#14281D] transition-colors"
                   >
-                    VIEW CART
+                    View & Edit Full Cart
                   </Link>
                 </div>
               </div>

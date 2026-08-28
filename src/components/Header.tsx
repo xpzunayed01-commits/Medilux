@@ -1,103 +1,154 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, Menu, X, ArrowUpRight } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, ArrowUpRight, Sparkles, ChevronRight, ShieldCheck, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { subscribeToCategories } from '../lib/dataService';
+import { Category } from '../types';
+import { categories as fallbackCategories } from '../data';
 
 export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>(fallbackCategories);
   const { cartCount, setIsCartOpen } = useCart();
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 15);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
+    const unsub = subscribeToCategories((cats) => {
+      if (cats && cats.length > 0) {
+        setCategories(cats.filter((c) => !c.isHidden));
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Clean navigation links (Removed SHOP, CARE, COFFEE, FOOD, SKIN from header as requested)
   const navLinks = [
     { label: 'HOME', path: '/' },
+    { label: 'ALL PRODUCTS', path: '/shop' },
     { label: 'ABOUT', path: '/about' },
   ];
 
   return (
     <>
+      {/* Top Luxury Announcement Ticker */}
+      <div className="bg-[#14281D] text-[#E6E1D6] text-[10px] sm:text-[11px] tracking-[0.2em] uppercase py-2 px-4 border-b border-white/5 relative z-50 overflow-hidden font-medium select-none">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="hidden md:flex items-center gap-6 text-[10px] text-[#E6E1D6]/70">
+            <span className="flex items-center gap-1.5"><Truck size={12} className="text-[#C5A880]" /> Express Delivery Dhaka & Nationwide</span>
+            <span className="flex items-center gap-1.5"><ShieldCheck size={12} className="text-[#C5A880]" /> 100% Genuine Certified</span>
+          </div>
+
+          <div className="w-full md:w-auto text-center flex items-center justify-center gap-2 mx-auto md:mx-0">
+            <Sparkles size={11} className="text-[#C5A880] shrink-0 animate-pulse" />
+            <span>Complimentary delivery on orders over ৳2,000</span>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-3 text-[10px] text-[#E6E1D6]/70">
+            <Link to="/contact" className="hover:text-white transition-colors">Support</Link>
+            <span>•</span>
+            <Link to="/faq" className="hover:text-white transition-colors">FAQ</Link>
+          </div>
+        </div>
+      </div>
+
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-40 transition-all duration-300',
+          'fixed top-8 sm:top-8 left-0 right-0 z-40 transition-all duration-500',
           isScrolled
-            ? 'glass shadow-xs py-2.5 sm:py-3.5'
-            : 'bg-gradient-to-b from-black/15 to-transparent py-3 sm:py-5'
+            ? 'glass shadow-xs py-2.5 sm:py-3 top-0!'
+            : 'bg-[#FAF9F5]/90 backdrop-blur-md py-3 sm:py-4 border-b border-black/[0.04]'
         )}
       >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Left: Mobile Hamburger or Desktop Minimal Nav */}
           <div className="flex items-center gap-6 flex-1">
             <button
-              className="md:hidden p-2 -ml-2 text-primary hover:text-emerald-800 transition-colors focus:outline-none"
+              className="md:hidden p-2 -ml-2 text-[#14281D] hover:text-[#7D8E79] transition-colors focus:outline-none cursor-pointer"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open Navigation Menu"
             >
-              <Menu size={22} strokeWidth={1.75} />
+              <Menu size={22} strokeWidth={1.5} />
             </button>
 
             {/* Desktop Minimal Nav Links */}
-            <nav className="hidden md:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.path}
-                  className="text-xs font-semibold tracking-widest text-primary hover:text-emerald-800 transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
+            <nav className="hidden md:flex items-center gap-7">
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.label}
+                    to={link.path}
+                    className={cn(
+                      "text-xs font-semibold tracking-[0.16em] uppercase transition-all duration-300 relative py-1",
+                      isActive
+                        ? "text-[#14281D] font-bold"
+                        : "text-[#6B6862] hover:text-[#14281D]"
+                    )}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <motion.span 
+                        layoutId="navIndicator" 
+                        className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#14281D]" 
+                      />
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 
           {/* Center: Brand Logo */}
           <Link
             to="/"
-            className="flex items-center justify-center flex-shrink-0 group"
+            className="flex items-center justify-center flex-shrink-0 group py-0.5"
           >
             <img
               src="https://i.postimg.cc/Y0Qrtp6H/Picsart-26-08-22-16-03-45-163.png"
               alt="MEDILUX"
-              className="h-7 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+              className="h-7 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
             />
           </Link>
 
           {/* Right: Actions (Search & Cart) */}
-          <div className="flex items-center justify-end gap-2 sm:gap-4 flex-1">
+          <div className="flex items-center justify-end gap-1.5 sm:gap-3 flex-1">
             <button
               onClick={onOpenSearch}
-              className="p-2 text-primary hover:text-emerald-800 transition-colors flex items-center gap-1.5 focus:outline-none"
+              className="p-2 text-[#14281D] hover:text-[#7D8E79] transition-colors flex items-center gap-1.5 focus:outline-none cursor-pointer rounded-full hover:bg-black/[0.03]"
               aria-label="Search products"
             >
-              <Search size={20} strokeWidth={1.75} />
-              <span className="hidden lg:inline-block text-[11px] font-medium tracking-wider text-text-muted">
+              <Search size={19} strokeWidth={1.75} />
+              <span className="hidden lg:inline-block text-[11px] font-semibold tracking-widest text-[#6B6862]">
                 SEARCH
               </span>
             </button>
 
             <button
               onClick={() => setIsCartOpen(true)}
-              className="p-2 -mr-1.5 text-primary hover:text-emerald-800 transition-colors relative flex items-center focus:outline-none cursor-pointer"
+              className="p-2 -mr-1.5 text-[#14281D] hover:text-[#7D8E79] transition-colors relative flex items-center focus:outline-none cursor-pointer rounded-full hover:bg-black/[0.03]"
               aria-label="Shopping Cart"
             >
-              <div className="relative">
-                <ShoppingBag size={21} strokeWidth={1.75} />
+              <div className="relative flex items-center gap-1.5">
+                <ShoppingBag size={20} strokeWidth={1.75} />
+                <span className="hidden sm:inline-block text-[11px] font-semibold tracking-widest text-[#6B6862]">
+                  BAG
+                </span>
                 {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-[#1A3626] text-white text-[10px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in-75 duration-200">
+                  <span className="bg-[#14281D] text-white text-[10px] font-bold h-4.5 min-w-[18px] px-1 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in-75 duration-200">
                     {cartCount}
                   </span>
                 )}
@@ -114,20 +165,20 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs md:hidden"
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs md:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-              className="w-[85vw] max-w-sm h-full bg-[#FAF9F6] shadow-2xl flex flex-col justify-between p-6 overflow-y-auto"
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+              className="w-[85vw] max-w-sm h-full bg-[#FAF9F5] shadow-2xl flex flex-col justify-between p-6 overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Top Drawer Header */}
               <div>
-                <div className="flex items-center justify-between pb-6 border-b border-black/5">
+                <div className="flex items-center justify-between pb-5 border-b border-black/[0.06]">
                   <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
                     <img
                       src="https://i.postimg.cc/Y0Qrtp6H/Picsart-26-08-22-16-03-45-163.png"
@@ -137,49 +188,82 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
                   </Link>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-primary hover:bg-black/5 rounded-full transition-colors"
+                    className="p-2 text-[#14281D] hover:bg-black/5 rounded-full transition-colors cursor-pointer"
                     aria-label="Close Menu"
                   >
-                    <X size={22} strokeWidth={1.5} />
+                    <X size={20} strokeWidth={1.5} />
                   </button>
                 </div>
 
-                {/* Nav Links */}
-                <nav className="flex flex-col gap-4 mt-8">
+                {/* Primary Nav Links */}
+                <nav className="flex flex-col gap-1 mt-6">
                   <Link
                     to="/"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-2xl font-light tracking-wide text-primary hover:text-emerald-800 transition-colors py-1 flex items-center justify-between"
+                    className="text-lg font-medium tracking-wide text-[#14281D] hover:text-[#7D8E79] transition-colors py-2.5 flex items-center justify-between border-b border-black/[0.03]"
                   >
                     <span>Home</span>
-                    <ArrowUpRight size={18} className="text-gray-400" />
+                    <ChevronRight size={16} className="text-gray-400" />
+                  </Link>
+                  <Link
+                    to="/shop"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-lg font-medium tracking-wide text-[#14281D] hover:text-[#7D8E79] transition-colors py-2.5 flex items-center justify-between border-b border-black/[0.03]"
+                  >
+                    <span>All Products</span>
+                    <ChevronRight size={16} className="text-gray-400" />
                   </Link>
                   <Link
                     to="/about"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-2xl font-light tracking-wide text-primary hover:text-emerald-800 transition-colors py-1 flex items-center justify-between"
+                    className="text-lg font-medium tracking-wide text-[#14281D] hover:text-[#7D8E79] transition-colors py-2.5 flex items-center justify-between border-b border-black/[0.03]"
                   >
-                    <span>About Us</span>
-                    <ArrowUpRight size={18} className="text-gray-400" />
+                    <span>About Medilux</span>
+                    <ChevronRight size={16} className="text-gray-400" />
                   </Link>
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       onOpenSearch();
                     }}
-                    className="text-left text-2xl font-light tracking-wide text-primary hover:text-emerald-800 transition-colors py-1 flex items-center justify-between"
+                    className="text-left text-lg font-medium tracking-wide text-[#14281D] hover:text-[#7D8E79] transition-colors py-2.5 flex items-center justify-between border-b border-black/[0.03] cursor-pointer"
                   >
-                    <span>Search</span>
-                    <Search size={18} className="text-gray-400" />
+                    <span>Search Catalog</span>
+                    <Search size={16} className="text-gray-400" />
                   </button>
                 </nav>
+
+                {/* Categories quick links */}
+                <div className="mt-8">
+                  <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6B6862] block mb-3">
+                    Curated Collections
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {categories.slice(0, 6).map((cat) => (
+                      <Link
+                        key={cat.id}
+                        to={`/collections/${cat.id}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="px-3 py-2 bg-white rounded-xl text-xs font-medium text-[#14281D] hover:bg-[#14281D] hover:text-white transition-all border border-black/[0.04] flex items-center justify-between"
+                      >
+                        <span className="truncate">{cat.name}</span>
+                        <ArrowUpRight size={12} className="opacity-60" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Bottom Info */}
-              <div className="pt-6 border-t border-black/5 text-xs text-text-muted space-y-2">
-                <p className="font-semibold text-primary">MEDILUX LUXURY CARE</p>
-                <p>Everyday, Elevated Living.</p>
-                <p className="pt-2 text-[11px] text-gray-400">Dhaka, Bangladesh</p>
+              <div className="pt-6 border-t border-black/[0.06] text-xs text-[#6B6862] space-y-2">
+                <p className="font-semibold text-[#14281D]">MEDILUX CARE</p>
+                <p className="text-[11px]">Everyday, Elevated Living.</p>
+                <div className="pt-2 flex items-center justify-between text-[11px] text-gray-400">
+                  <span>Dhaka, Bangladesh</span>
+                  <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="underline text-[#14281D]">
+                    Contact Support
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -188,4 +272,3 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
     </>
   );
 }
-

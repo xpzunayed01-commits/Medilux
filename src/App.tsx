@@ -25,6 +25,7 @@ const Policies = lazy(() => import('./pages/info/Policies').then(module => ({ de
 // Admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(module => ({ default: module.AdminLogin })));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then(module => ({ default: module.AdminLayout })));
+const AdminRoute = lazy(() => import('./components/admin/AdminRoute').then(module => ({ default: module.AdminRoute })));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders').then(module => ({ default: module.AdminOrders })));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts').then(module => ({ default: module.AdminProducts })));
@@ -53,20 +54,22 @@ export default function App() {
           path="/xpzunayed/*"
           element={
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F4F6F4]"><div className="w-8 h-8 rounded-full border-2 border-emerald-800 border-t-transparent animate-spin"></div></div>}>
-              <AdminLayout />
+              <AdminRoute />
             </Suspense>
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="categories" element={<AdminCategories />} />
-          <Route path="inventory" element={<AdminInventory />} />
-          <Route path="customers" element={<AdminCustomers />} />
-          <Route path="content" element={<AdminContent />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="*" element={<Navigate to="dashboard" replace />} />
+          <Route element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="categories" element={<AdminCategories />} />
+            <Route path="inventory" element={<AdminInventory />} />
+            <Route path="customers" element={<AdminCustomers />} />
+            <Route path="content" element={<AdminContent />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="*" element={<Navigate to="dashboard" replace />} />
+          </Route>
         </Route>
 
         {/* Public Storefront Routes */}

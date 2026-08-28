@@ -1,21 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1A3626;      /* Deep Forest Green */
-  --color-secondary: #8A9A86;    /* Muted Sage */
-  --color-background: #FAF9F6;   /* Warm Ivory */
+  --color-primary: #14281D;      /* Deep Forest Green */
+  --color-secondary: #7D8E79;    /* Muted Sage */
+  --color-background: #FAF9F5;   /* Warm Ivory Linen */
   --color-surface: #FFFFFF;
-  --color-text-main: #1C1C1C;    /* Deep Charcoal */
-  --color-text-muted: #666666;
-  --color-accent: #E8E3D9;       /* Muted Beige */
+  --color-text-main: #181816;    /* Deep Charcoal */
+  --color-text-muted: #6B6862;
+  --color-accent: #E6E1D6;       /* Muted Oat Beige */
+  --color-accent-gold: #C5A880;  /* Subtle Warm Bronze/Gold */
   
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
 }
 
 @layer base {
   :root {
-    --background: #FAF9F6;
-    --foreground: #1C1C1C;
+    --background: #FAF9F5;
+    --foreground: #181816;
   }
   body {
     background-color: var(--background);
@@ -23,16 +26,25 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
   
-  /* Surrealism utilities */
+  /* Luxury typography helpers */
+  .font-serif-luxury {
+    font-family: var(--font-serif);
+  }
+  .font-display-modern {
+    font-family: var(--font-display);
+  }
+  
+  /* Surrealism & Ambient utilities */
   .floating {
-    animation: floating 3s ease-in-out infinite;
+    animation: floating 4s ease-in-out infinite;
   }
   
   @keyframes floating {
     0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-8px); }
     100% { transform: translateY(0px); }
   }
 }
@@ -46,8 +58,21 @@
 }
 
 .glass {
-  background: rgba(250, 249, 246, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(26, 54, 38, 0.05);
+  background: rgba(250, 249, 245, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(20, 40, 29, 0.06);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(20, 40, 29, 0.06);
+}
+
+.glass-dark {
+  background: rgba(20, 40, 29, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }

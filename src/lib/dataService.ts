@@ -400,6 +400,43 @@ export function subscribeToOrders(callback: (orders: Order[]) => void) {
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'status'> & { status?: OrderStatus }): Promise<Order> {
+  // SECURE SERVER-SIDE ORDER CREATION
+  try {
+    const res = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: orderData.items,
+        customerDetails: {
+          name: orderData.customerName,
+          phone: orderData.customerPhone,
+          email: orderData.customerEmail,
+          streetAddress: orderData.streetAddress,
+          postalCode: orderData.postalCode
+        },
+        paymentMethod: orderData.paymentMethod,
+        city: orderData.city,
+        notes: orderData.notes
+      })
+    });
+    
+    const data = await res.json();
+    if (res.ok && data.success && data.order) {
+      // Update local cache
+      const currentOrders = getLocalCache<Order[]>(CACHE_ORDERS_KEY, []);
+      setLocalCache(CACHE_ORDERS_KEY, [data.order, ...currentOrders]);
+      return data.order as Order;
+    }
+    
+    if (res.status !== 500) {
+      throw new Error(data.error || "Order creation failed securely");
+    }
+    console.warn("Backend secure order creation unavailable. Falling back to client-side creation.");
+  } catch (err) {
+    console.warn("Secure backend API failed or unavailable. Falling back to client-side order creation:", err);
+  }
+
+  // FALLBACK: Client-side order creation (Vulnerable to price manipulation, used only if backend not configured)
   const orderNumber = String(Math.floor(100000 + Math.random() * 900000));
   const newOrder: Order = {
     ...orderData,
@@ -482,7 +519,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
     console.error('Error updating customer record:', custErr);
   }
 
-  // 3. Send Telegram Notification (Secondary - Failures should not block order success)
+  // 3. Send Telegram Notification (Secondary)
   try {
     fetch('/api/notify-telegram', {
       method: 'POST',
