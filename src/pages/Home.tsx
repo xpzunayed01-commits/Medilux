@@ -180,62 +180,80 @@ export function Home() {
   };
 
   return (
-    <div className="flex flex-col bg-background text-text-main overflow-x-hidden">
+    <div className="flex flex-col bg-background text-text-main">
       {/* 
         Hero Section:
-        - Full 9:16 aspect ratio on mobile screens (w-full aspect-[9/16] min-h-[580px] max-h-[100svh])
-        - Spacious responsive height on larger screens (sm:min-h-[88vh] md:min-h-[92vh] sm:aspect-auto)
-        - Clean gradient overlay so the top/center photo is crystal clear and the bottom text/buttons pop
+        - Mobile: Full bleed background image with bottom gradient and text at the bottom.
+        - Desktop: Elegant split layout. Text on the left, image on the right inside a structured container.
       */}
-      <section className="relative w-full aspect-[9/16] min-h-[580px] max-h-[100svh] sm:aspect-auto sm:min-h-[88vh] md:min-h-[92vh] flex flex-col justify-end overflow-hidden">
-        <div className="absolute inset-0 z-0 bg-[#0F2417]">
+      <section className="relative w-full min-h-[90svh] sm:min-h-[85dvh] flex flex-col sm:flex-row items-center justify-center overflow-hidden bg-[#F4F2EC]">
+        {/* Mobile-only background image layer */}
+        <div className="absolute inset-0 z-0 sm:hidden bg-[#0F2417]">
           <img
             referrerPolicy="no-referrer"
             src={content.heroImage || "https://i.postimg.cc/nzJnVXkz/Picsart-26-08-22-17-53-33-572.jpg"}
             alt="MEDILUX Everyday Elevated"
-            className="w-full h-full object-cover object-center sm:object-center"
+            className="w-full h-full object-cover object-center"
             fetchPriority="high"
             loading="eager"
             decoding="async"
           />
-          {/* Mobile high-contrast gradient from bottom + subtle desktop ambient wash */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent sm:from-background/70 sm:via-background/30 sm:to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"></div>
         </div>
         
-        <motion.div 
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 md:px-12 pt-20 pb-10 sm:pt-28 sm:pb-16"
-        >
-          <div className="max-w-2xl text-left">
-            <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white sm:text-primary leading-[1.08] sm:leading-[0.95] mb-3 sm:mb-5 whitespace-pre-line drop-shadow-sm">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 md:px-12 pt-32 pb-12 sm:py-20 flex flex-col sm:flex-row items-center sm:items-stretch gap-10 lg:gap-16 h-full flex-1">
+          
+          {/* Left Text Content */}
+          <motion.div 
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="flex-1 flex flex-col justify-end sm:justify-center mt-auto sm:mt-0 text-left w-full"
+          >
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white sm:text-primary leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-6 whitespace-pre-line drop-shadow-md sm:drop-shadow-none">
               {content.heroTitle || "EVERYDAY,\nELEVATED."}
             </h1>
 
-            {/* Subtitle conditionally rendered if provided */}
             {content.heroSubtitle && !content.heroSubtitle.toLowerCase().includes('surreal') && (
-              <p className="text-xs sm:text-base md:text-lg text-white/90 sm:text-primary/85 font-light max-w-lg mb-4 sm:mb-6">
+              <p className="text-sm sm:text-base md:text-lg text-white/95 sm:text-text-muted font-light max-w-md mb-6 sm:mb-8 drop-shadow-sm sm:drop-shadow-none">
                 {content.heroSubtitle}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 mt-2 sm:mt-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <Link
                 to={content.heroButtonLink || "/shop"}
-                className="px-6 sm:px-9 py-2.5 sm:py-3.5 bg-white text-primary sm:bg-primary sm:text-white text-xs font-semibold tracking-widest rounded-full hover:bg-white/90 sm:hover:bg-primary/90 transition-all shadow-md active:scale-98"
+                className="px-8 sm:px-10 py-3.5 sm:py-4 bg-white text-primary sm:bg-primary sm:text-white text-[11px] sm:text-xs font-semibold tracking-widest rounded-full hover:bg-white/90 sm:hover:bg-primary/90 transition-all shadow-lg sm:shadow-md active:scale-95"
               >
                 {content.heroButtonText || "SHOP NOW"}
               </Link>
               <Link
                 to="/about"
-                className="px-6 sm:px-9 py-2.5 sm:py-3.5 bg-black/40 sm:bg-white/70 backdrop-blur-md text-white sm:text-primary text-xs font-semibold tracking-widest rounded-full hover:bg-black/60 sm:hover:bg-white transition-all border border-white/20 sm:border-black/5 active:scale-98"
+                className="px-8 sm:px-10 py-3.5 sm:py-4 bg-black/40 sm:bg-transparent backdrop-blur-md text-white sm:text-primary text-[11px] sm:text-xs font-semibold tracking-widest rounded-full sm:hover:bg-black/5 transition-all border border-white/30 sm:border-primary/20 active:scale-95"
               >
                 EXPLORE
               </Link>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+
+          {/* Desktop-only Right Image Container */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            className="hidden sm:flex flex-1 relative w-full h-[600px] lg:h-[700px] max-h-[80vh] rounded-3xl overflow-hidden shadow-2xl"
+          >
+             <img
+              referrerPolicy="no-referrer"
+              src={content.heroImage || "https://i.postimg.cc/nzJnVXkz/Picsart-26-08-22-17-53-33-572.jpg"}
+              alt="MEDILUX Everyday Elevated"
+              className="w-full h-full object-cover object-center"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-black/5 mix-blend-multiply"></div>
+          </motion.div>
+
+        </div>
       </section>
 
       {/* Modern Luxury Perks Strip */}

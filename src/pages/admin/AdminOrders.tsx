@@ -32,15 +32,18 @@ export function AdminOrders() {
   useEffect(() => {
     const unsub = subscribeToOrders((data) => {
       setOrders(data);
-      // Keep selected order in sync if open
-      if (selectedOrder) {
-        const found = data.find((o) => o.id === selectedOrder.id);
-        if (found) setSelectedOrder(found);
-      }
+      // Keep selected order in sync if open using functional update
+      setSelectedOrder((prevSelected) => {
+        if (prevSelected) {
+          const found = data.find((o) => o.id === prevSelected.id);
+          return found ? found : prevSelected;
+        }
+        return prevSelected;
+      });
     });
 
     return () => unsub();
-  }, [selectedOrder?.id]);
+  }, []);
 
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
     try {
@@ -388,9 +391,21 @@ export function AdminOrders() {
             {/* Modal Header */}
             <div className="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-10">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm sm:text-base font-bold text-gray-900">Order #{selectedOrder.orderNumber}</span>
                   {getStatusBadge(selectedOrder.status)}
+                  {selectedOrder.telegramNotificationSent === true && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-blue-50 text-blue-700 border border-blue-100" title="Telegram Sent">
+                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>
+                      Telegram Sent
+                    </span>
+                  )}
+                  {selectedOrder.telegramNotificationSent === false && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-red-50 text-red-700 border border-red-100" title="Telegram Failed or Pending">
+                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span>
+                      Telegram Error
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">
                   Placed on {new Date(selectedOrder.createdAt).toLocaleString()}

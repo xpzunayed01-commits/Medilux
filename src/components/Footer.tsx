@@ -62,18 +62,18 @@ export function Footer() {
           <div>
             <h4 className="text-xs font-semibold tracking-widest mb-6">COMPANY</h4>
             <ul className="space-y-4 text-sm text-text-muted">
-              <li><Link to="/about" className="hover:text-primary transition-colors">About</Link></li>
-              <li><Link to="/shop" className="hover:text-primary transition-colors">Catalog</Link></li>
-              <li><Link to="/about" className="hover:text-primary transition-colors">Contact</Link></li>
+              <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-semibold tracking-widest mb-6">POLICIES</h4>
             <ul className="space-y-4 text-sm text-text-muted">
-              <li><span className="hover:text-primary transition-colors">Cash On Delivery</span></li>
-              <li><span className="hover:text-primary transition-colors">100% Genuine Products</span></li>
-              <li><span className="hover:text-primary transition-colors">Nationwide Shipping</span></li>
+              <li><Link to="/policies#terms" className="hover:text-primary transition-colors">Terms & Conditions</Link></li>
+              <li><Link to="/policies#privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/policies#returns" className="hover:text-primary transition-colors">Return Policy</Link></li>
             </ul>
           </div>
         </div>

@@ -60,6 +60,7 @@ export interface Order {
   paymentMethod: 'cod' | 'bkash' | 'nagad' | string;
   paymentStatus?: 'unpaid' | 'paid';
   status: OrderStatus;
+  telegramNotificationSent?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

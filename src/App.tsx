@@ -17,6 +17,11 @@ const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(module => ({
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation').then(module => ({ default: module.OrderConfirmation })));
 const About = lazy(() => import('./pages/About').then(module => ({ default: module.About })));
 
+// Info pages
+const Contact = lazy(() => import('./pages/info/Contact').then(module => ({ default: module.Contact })));
+const FAQ = lazy(() => import('./pages/info/FAQ').then(module => ({ default: module.FAQ })));
+const Policies = lazy(() => import('./pages/info/Policies').then(module => ({ default: module.Policies })));
+
 // Admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(module => ({ default: module.AdminLogin })));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then(module => ({ default: module.AdminLayout })));
@@ -80,6 +85,9 @@ export default function App() {
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/order-confirmation" element={<OrderConfirmation />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/policies" element={<Policies />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>

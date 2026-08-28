@@ -406,6 +406,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
     id: `ord_${Date.now()}`,
     orderNumber,
     status: orderData.status || 'new',
+    telegramNotificationSent: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -479,6 +480,33 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
     }
   } catch (custErr) {
     console.error('Error updating customer record:', custErr);
+  }
+
+  // 3. Send Telegram Notification (Secondary - Failures should not block order success)
+  try {
+    fetch('/api/notify-telegram', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ order: newOrder }),
+    })
+    .then(res => res.json())
+    .then(async (data) => {
+      if (data.success && newOrder.id) {
+        try {
+          const orderRef = doc(db, 'orders', newOrder.id);
+          await updateDoc(orderRef, { telegramNotificationSent: true });
+        } catch (e) {
+          console.warn('Could not update telegramNotificationSent flag in Firestore', e);
+        }
+      }
+    })
+    .catch(err => {
+      console.error('Network error triggering Telegram notification:', err);
+    });
+  } catch (telegramErr) {
+    console.error('Error triggering Telegram notification:', telegramErr);
   }
 
   return newOrder;
