@@ -1,12 +1,12 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { CartDrawer } from './CartDrawer';
 import { SearchOverlay } from './SearchOverlay';
 import { motion, AnimatePresence } from 'motion/react';
 
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout({ children }: { children?: ReactNode }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
 
@@ -27,7 +27,7 @@ export function Layout({ children }: { children: ReactNode }) {
           transition={{ duration: 0.3 }}
           className="flex-1 flex flex-col"
         >
-          {children}
+          {children || <Outlet />}
         </motion.main>
       </AnimatePresence>
 
