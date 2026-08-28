@@ -131,6 +131,7 @@ export function Footer() {
               <li><Link to="/about" className="hover:text-white transition-colors">Our Story & Craft</Link></li>
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact Concierge</Link></li>
               <li><Link to="/faq" className="hover:text-white transition-colors">Frequently Asked Questions</Link></li>
+              <li><Link to="/xpzunayed" className="text-[#C5A880] hover:underline font-semibold flex items-center gap-1">Admin Portal →</Link></li>
             </ul>
           </div>
 

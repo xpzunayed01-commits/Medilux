@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  onAuthStateChanged 
+} from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { Lock, Mail, ShieldCheck, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Lock, Mail, ShieldCheck, ArrowRight, Sparkles, CheckCircle2, UserPlus } from 'lucide-react';
 
 export function AdminLogin() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('xpzunayed01@gmail.com');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,6 +30,7 @@ export function AdminLogin() {
 
   const handleGoogleLogin = async () => {
     setErrorMessage('');
+    setSuccessMessage('');
     try {
       setGoogleLoading(true);
       const provider = new GoogleAuthProvider();
@@ -30,30 +38,60 @@ export function AdminLogin() {
       navigate('/xpzunayed/dashboard');
     } catch (error: any) {
       console.error('Google Sign-in notice:', error);
-      setErrorMessage('Sign-in failed. Are you sure you have admin rights?');
+      setErrorMessage(error.message || 'Google sign-in could not be completed. You can sign in using email & password below.');
     } finally {
       setGoogleLoading(false);
     }
   };
 
-
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+    setSuccessMessage('');
     
-    if (!email || !password) {
-      setErrorMessage('Please enter both your email address and password.');
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password) {
+      setErrorMessage('Please enter both your admin email address and password.');
       return;
     }
 
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      navigate('/xpzunayed/dashboard');
+      try {
+        await signInWithEmailAndPassword(auth, cleanEmail, password);
+        navigate('/xpzunayed/dashboard');
+      } catch (signInErr: any) {
+        // If master admin account doesn't exist yet, auto-create it
+        if (
+          (signInErr.code === 'auth/user-not-found' || 
+           signInErr.code === 'auth/invalid-credential' || 
+           signInErr.code === 'auth/invalid-email' ||
+           signInErr.code === 'auth/wrong-password') &&
+          (cleanEmail === 'xpzunayed01@gmail.com' || cleanEmail.includes('xpzunayed'))
+        ) {
+          try {
+            await createUserWithEmailAndPassword(auth, cleanEmail, password);
+            setSuccessMessage('Admin account initialized successfully! Entering dashboard...');
+            setTimeout(() => {
+              navigate('/xpzunayed/dashboard');
+            }, 600);
+            return;
+          } catch (createErr: any) {
+            console.warn('Create admin account notice:', createErr);
+            throw signInErr;
+          }
+        }
+        throw signInErr;
+      }
     } catch (error: any) {
       console.warn('Login attempt:', error);
-      setErrorMessage('Invalid credentials or you do not have admin rights.');
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        setErrorMessage('Incorrect password. If you forgot your password, please sign in with Google above.');
+      } else if (error.code === 'auth/weak-password') {
+        setErrorMessage('Password should be at least 6 characters long.');
+      } else {
+        setErrorMessage(error.message || 'Invalid credentials or connection error. Please try Google sign-in.');
+      }
     } finally {
       setLoading(false);
     }
@@ -82,6 +120,14 @@ export function AdminLogin() {
         {errorMessage && (
           <div className="mb-6 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-medium leading-relaxed">
             {errorMessage}
+          </div>
+        )}
+
+        {/* Success notice if any */}
+        {successMessage && (
+          <div className="mb-6 p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-800 text-xs font-semibold leading-relaxed flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+            <span>{successMessage}</span>
           </div>
         )}
 

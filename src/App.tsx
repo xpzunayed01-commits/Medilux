@@ -39,6 +39,12 @@ export default function App() {
   return (
     <CartProvider>
       <Routes>
+        {/* Admin Aliases */}
+        <Route path="/admin" element={<Navigate to="/xpzunayed" replace />} />
+        <Route path="/admin/*" element={<Navigate to="/xpzunayed" replace />} />
+        <Route path="/admin-login" element={<Navigate to="/xpzunayed" replace />} />
+        <Route path="/login" element={<Navigate to="/xpzunayed" replace />} />
+
         {/* Admin Login Route */}
         <Route
           path="/xpzunayed"

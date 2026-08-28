@@ -69,15 +69,26 @@ export function AdminRoute() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F4F6F4] p-4 text-center">
         <ShieldAlert size={48} className="text-rose-500 mb-4" />
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-        <p className="text-gray-500 mb-6 max-w-sm">
-          Your account is not registered as an administrator for Medilux.
+        <p className="text-gray-500 mb-6 max-w-sm text-sm">
+          The current account ({auth.currentUser?.email || 'Logged in user'}) is not registered as an administrator for Medilux.
         </p>
-        <button
-          onClick={() => window.location.href = '/'}
-          className="px-6 py-2 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors"
-        >
-          Return to Store
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={async () => {
+              await auth.signOut();
+              window.location.href = '/xpzunayed';
+            }}
+            className="px-5 py-2.5 bg-emerald-800 text-white rounded-xl font-bold text-xs hover:bg-emerald-900 transition-colors cursor-pointer shadow-xs"
+          >
+            Sign Out & Switch Account
+          </button>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl font-bold text-xs hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Return to Store
+          </button>
+        </div>
       </div>
     );
   }

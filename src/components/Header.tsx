@@ -61,6 +61,10 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
             <Link to="/contact" className="hover:text-white transition-colors">Support</Link>
             <span>•</span>
             <Link to="/faq" className="hover:text-white transition-colors">FAQ</Link>
+            <span>•</span>
+            <Link to="/xpzunayed" className="text-[#C5A880] hover:text-white font-semibold flex items-center gap-1 transition-colors">
+              Admin Portal
+            </Link>
           </div>
         </div>
       </div>
@@ -254,17 +258,19 @@ export function Header({ onOpenSearch }: { onOpenSearch: () => void }) {
                 </div>
               </div>
 
-              {/* Bottom Info */}
-              <div className="pt-6 border-t border-black/[0.06] text-xs text-[#6B6862] space-y-2">
-                <p className="font-semibold text-[#14281D]">MEDILUX CARE</p>
-                <p className="text-[11px]">Everyday, Elevated Living.</p>
-                <div className="pt-2 flex items-center justify-between text-[11px] text-gray-400">
-                  <span>Dhaka, Bangladesh</span>
-                  <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="underline text-[#14281D]">
-                    Contact Support
-                  </Link>
+                {/* Bottom Info */}
+                <div className="pt-6 border-t border-black/[0.06] text-xs text-[#6B6862] space-y-2">
+                  <p className="font-semibold text-[#14281D]">MEDILUX CARE</p>
+                  <p className="text-[11px]">Everyday, Elevated Living.</p>
+                  <div className="pt-2 flex items-center justify-between text-[11px]">
+                    <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="underline text-[#14281D]">
+                      Contact Support
+                    </Link>
+                    <Link to="/xpzunayed" onClick={() => setIsMobileMenuOpen(false)} className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                      Admin Portal 🔒
+                    </Link>
+                  </div>
                 </div>
-              </div>
             </motion.div>
           </motion.div>
         )}
